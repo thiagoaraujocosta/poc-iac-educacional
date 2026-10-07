@@ -75,8 +75,8 @@ if (( falhas > 0 )); then
     echo "--- resposta do proxy em /"
     curl -ksi --max-time 10 "https://localhost:${HTTPS}/" 2>&1 | head -n 40 | cut -c1-300 || true
     echo "--- corpo da resposta (texto sem marcação)"
-    curl -ks --max-time 10 "https://localhost:${HTTPS}/" 2>&1 | sed 's/<[^>]*>/ /g' | tr -s ' 
-' | head -c 1500 || true
+    curl -ks --max-time 10 "https://localhost:${HTTPS}/" 2>&1 | tr '
+' ' ' | sed 's/<style.*<\/style>//; s/<[^>]*>/ /g' | tr -s ' ' | head -c 1500 || true
     echo
     echo "--- Moodle direto (rede de servidores), com o mesmo Host"
     docker exec "${PREFIXO}-moodle" sh -c 'curl -s -H "Host: localhost:'"${HTTPS}"'" -H "X-Forwarded-Proto: https" -o /dev/null -w "%{http_code}
