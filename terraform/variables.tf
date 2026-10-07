@@ -81,9 +81,9 @@ variable "rede_base_escolas" {
 }
 
 variable "dominio" {
-  description = "Nome DNS usado no certificado autoassinado e no Moodle."
+  description = "Nome DNS usado no certificado autoassinado e no Moodle. Não use localhost: o Moodle atrás de proxy reverso rejeita esse nome (veja docs/STATUS_VERIFICACAO.md). Para acessar pelo navegador, aponte o nome para 127.0.0.1 no arquivo hosts."
   type        = string
-  default     = "localhost"
+  default     = "escola.local"
 }
 
 variable "ip_publicacao" {

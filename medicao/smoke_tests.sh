@@ -30,9 +30,10 @@ esperar() {
     echo "OK     $nome"
 }
 
-http_ok() { # URL: código 2xx ou 3xx
+DOMINIO="${ESCOLA_DOMINIO:-escola.local}"
+http_ok() { # URL: código 2xx ou 3xx; usa o nome DNS da escola (resolvido para 127.0.0.1)
     local codigo
-    codigo="$(curl -ks -o /dev/null -w '%{http_code}' --max-time 10 "$1")" || return 1
+    codigo="$(curl -ks -o /dev/null -w '%{http_code}' --max-time 10 --resolve "${DOMINIO}:${HTTPS}:127.0.0.1" "$1")" || return 1
     [[ "$codigo" =~ ^(2|3)[0-9][0-9]$ ]]
 }
 
@@ -58,7 +59,7 @@ if [[ "$PERFIL" == "leve" ]]; then
     esperar "MariaDB saudável (healthcheck)"          mariadb_saudavel
 else
     if [[ "$MOODLE" == "1" ]]; then
-        esperar "Moodle acessível pelo proxy (2xx/3xx)"   http_ok "https://localhost:${HTTPS}/"
+        esperar "Moodle acessível pelo proxy (2xx/3xx)"   http_ok "https://${DOMINIO}:${HTTPS}/"
     fi
     esperar "Grafana saudável"                        curl -sf --max-time 10 "http://localhost:${GRAFANA}/api/health"
     esperar "Prometheus saudável"                     curl -sf --max-time 10 "http://localhost:${PROM}/-/healthy"
@@ -79,7 +80,7 @@ if (( falhas > 0 )); then
 ' ' ' | sed 's/<style.*<\/style>//; s/<[^>]*>/ /g' | tr -s ' ' | head -c 1500 || true
     echo
     echo "--- Moodle através do proxy com diferentes cabeçalhos Host"
-    for h in "localhost" "localhost:${HTTPS}" "${PREFIXO}-nginx"; do
+    for h in "localhost" "${DOMINIO}" "${DOMINIO}:${HTTPS}" "${PREFIXO}-nginx"; do
         printf '%s -> ' "$h"; curl -ks -o /dev/null -w '%{http_code}
 ' --max-time 10 -H "Host: $h" "https://localhost:${HTTPS}/"
     done

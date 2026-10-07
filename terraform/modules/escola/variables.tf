@@ -24,9 +24,9 @@ variable "bloco_cidr" {
 }
 
 variable "dominio" {
-  description = "Nome DNS do certificado e do Moodle."
+  description = "Nome DNS do certificado e do Moodle (não use localhost)."
   type        = string
-  default     = "localhost"
+  default     = "escola.local"
 }
 
 variable "ip_publicacao" {
