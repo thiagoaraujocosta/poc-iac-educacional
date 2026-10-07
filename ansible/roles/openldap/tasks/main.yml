@@ -1,0 +1,79 @@
+---
+- name: Verificar se a rede de servidores existe (criada pelo Terraform)
+  community.docker.docker_network_info:
+    name: "{{ escola_rede_servidores }}"
+  register: openldap_rede
+  failed_when: not openldap_rede.exists
+
+- name: Criar volumes do LDAP
+  community.docker.docker_volume:
+    name: "{{ item }}"
+  loop:
+    - "{{ escola_prefixo }}-ldap-dados"
+    - "{{ escola_prefixo }}-ldap-certs"
+
+- name: Criar o contêiner LDAP sem iniciar (para copiar os certificados antes)
+  community.docker.docker_container:
+  args: "{{ openldap_container_args | combine({'state': 'present'}) }}"
+  no_log: true
+
+- name: Copiar certificados para o volume do LDAP
+  community.docker.docker_container_copy_into:
+    container: "{{ openldap_nome }}"
+    path: "{{ openldap_tls_dir }}/{{ item }}"
+    container_path: "{{ openldap_certs_dir_container }}/{{ item }}"
+    owner_id: 1001
+    group_id: 1001
+    mode: 0600
+  loop:
+    - tls.crt
+    - tls.key
+    - ca.crt
+
+- name: Iniciar o contêiner LDAP
+  community.docker.docker_container:
+  args: "{{ openldap_container_args | combine({'state': 'started'}) }}"
+  no_log: true
+
+- name: Aguardar o slapd responder
+  community.docker.docker_container_exec:
+    container: "{{ openldap_nome }}"
+    argv:
+      - "{{ openldap_bin }}/ldapsearch"
+      - -x
+      - -H
+      - ldap://localhost:1389
+      - -b
+      - "{{ ldap_dominio_base }}"
+      - -s
+      - base
+      - dn
+  register: openldap_espera
+  until: openldap_espera.rc == 0
+  retries: 30
+  delay: 2
+  changed_when: false
+
+- name: Copiar o LDIF de estrutura para o contêiner
+  community.docker.docker_container_copy_into:
+    container: "{{ openldap_nome }}"
+    container_path: /tmp/estrutura.ldif
+    content: "{{ lookup('ansible.builtin.template', 'estrutura.ldif.j2') }}"
+    mode: 0644
+  no_log: true
+
+# ldapadd -c continua após erros; o código 68 significa "entrada já existe",
+# o que torna a carga idempotente. A senha vem do ambiente do contêiner.
+- name: Carregar unidades, grupos e usuários de exemplo
+  community.docker.docker_container_exec:
+    container: "{{ openldap_nome }}"
+    argv:
+      - sh
+      - -c
+      - >-
+        {{ openldap_bin }}/ldapadd -c -x -H ldap://localhost:1389
+        -D "{{ ldap_admin_dn }}" -w "$LDAP_ADMIN_PASSWORD"
+        -f /tmp/estrutura.ldif
+  register: openldap_carga
+  changed_when: "'adding new entry' in openldap_carga.stdout"
+  failed_when: openldap_carga.rc not in [0, 68]

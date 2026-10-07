@@ -1,0 +1,15 @@
+---
+# Configuração pós-provisionamento. Pré-requisito: "terraform apply" já executado
+# (redes, volumes e contêineres da escola existem).
+- name: Configurar a escola (LDAP, hardening do proxy e backup)
+  hosts: localhost
+  gather_facts: false
+  roles:
+    - role: tls_cert
+      tags: [seguranca, tls]
+    - role: openldap
+      tags: [seguranca, ldap]
+    - role: nginx_hardening
+      tags: [seguranca, proxy]
+    - role: backup_restic
+      tags: [armazenamento, backup]

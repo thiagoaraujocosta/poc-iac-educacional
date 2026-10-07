@@ -1,0 +1,17 @@
+---
+# =====================================================================
+# ARQUIVO DE EXEMPLO - NÃO CRIPTOGRAFADO - APENAS VALORES FICTÍCIOS
+# Nunca coloque segredos reais neste arquivo. Ele existe só para mostrar
+# a estrutura esperada e é permitido no repositório (veja .gitleaks.toml).
+#
+# Como usar:
+#   1. cp group_vars/all/vault.yml.exemplo group_vars/all/vault.yml
+#   2. Troque os valores FICTICIO-... por segredos fortes gerados por você.
+#   3. ansible-vault encrypt group_vars/all/vault.yml
+#   4. Execute com --ask-vault-pass ou --vault-password-file.
+# O arquivo vault.yml (criptografado) é o único que pode ser versionado; o
+# arquivo de senha do vault NUNCA deve ir para o Git.
+# =====================================================================
+vault_ldap_admin_password: "FICTICIO-troque-me-ldap-admin"
+vault_ldap_usuario_exemplo_password: "FICTICIO-troque-me-usuario-exemplo"
+vault_restic_password: "FICTICIO-troque-me-restic"

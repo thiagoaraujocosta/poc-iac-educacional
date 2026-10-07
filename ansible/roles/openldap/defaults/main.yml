@@ -1,0 +1,46 @@
+---
+openldap_nome: "{{ escola_prefixo }}-ldap"
+openldap_tls_dir: "{{ playbook_dir }}/.tls/{{ escola_prefixo }}"
+openldap_certs_dir_container: /opt/bitnami/openldap/certs
+openldap_bin: /opt/bitnami/openldap/bin
+
+openldap_unidades:
+  - professores
+  - alunos
+  - administrativo
+
+# Grupos POSIX (schema nis) sem membros obrigatórios.
+openldap_grupos:
+  - { cn: professores, gid: 10001 }
+  - { cn: alunos, gid: 10002 }
+  - { cn: administrativo, gid: 10003 }
+
+# Usuários fictícios apenas para demonstração.
+openldap_usuarios_exemplo:
+  - { uid: prof.exemplo, unidade: professores, nome: Professora, sobrenome: Exemplo }
+  - { uid: aluno.exemplo, unidade: alunos, nome: Aluno, sobrenome: Exemplo }
+  - { uid: adm.exemplo, unidade: administrativo, nome: Auxiliar, sobrenome: Exemplo }
+
+openldap_container_args:
+  name: "{{ openldap_nome }}"
+  image: "{{ ldap_imagem }}"
+  restart_policy: unless-stopped
+  env:
+    LDAP_ROOT: "{{ ldap_dominio_base }}"
+    LDAP_ADMIN_USERNAME: admin
+    LDAP_ADMIN_PASSWORD: "{{ ldap_admin_password }}"
+    LDAP_PORT_NUMBER: "1389"
+    LDAP_LDAPS_PORT_NUMBER: "1636"
+    LDAP_ENABLE_TLS: "yes"
+    LDAP_TLS_CERT_FILE: "{{ openldap_certs_dir_container }}/tls.crt"
+    LDAP_TLS_KEY_FILE: "{{ openldap_certs_dir_container }}/tls.key"
+    LDAP_TLS_CA_FILE: "{{ openldap_certs_dir_container }}/ca.crt"
+    LDAP_TLS_VERIFY_CLIENT: never
+  volumes:
+    - "{{ escola_prefixo }}-ldap-dados:/bitnami/openldap"
+    - "{{ escola_prefixo }}-ldap-certs:{{ openldap_certs_dir_container }}"
+  networks:
+    - name: "{{ escola_rede_servidores }}"
+  published_ports:
+    - "{{ ldap_ip_publicacao }}:{{ ldap_porta_host }}:1389"
+    - "{{ ldap_ip_publicacao }}:{{ ldaps_porta_host }}:1636"

@@ -1,0 +1,32 @@
+# Gerenciado pelo Ansible (papel openldap). Dados fictícios de demonstração.
+{% for unidade in openldap_unidades %}
+dn: ou={{ unidade }},{{ ldap_dominio_base }}
+objectClass: organizationalUnit
+ou: {{ unidade }}
+
+{% endfor %}
+dn: ou=grupos,{{ ldap_dominio_base }}
+objectClass: organizationalUnit
+ou: grupos
+
+{% for grupo in openldap_grupos %}
+dn: cn={{ grupo.cn }},ou=grupos,{{ ldap_dominio_base }}
+objectClass: posixGroup
+cn: {{ grupo.cn }}
+gidNumber: {{ grupo.gid }}
+{% for u in openldap_usuarios_exemplo if u.unidade == grupo.cn %}
+memberUid: {{ u.uid }}
+{% endfor %}
+
+{% endfor %}
+{% for u in openldap_usuarios_exemplo %}
+dn: uid={{ u.uid }},ou={{ u.unidade }},{{ ldap_dominio_base }}
+objectClass: inetOrgPerson
+uid: {{ u.uid }}
+cn: {{ u.nome }} {{ u.sobrenome }}
+sn: {{ u.sobrenome }}
+givenName: {{ u.nome }}
+mail: {{ u.uid }}@exemplo.invalid
+userPassword: {{ ldap_usuario_exemplo_password }}
+
+{% endfor %}

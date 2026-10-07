@@ -1,0 +1,45 @@
+---
+- name: Criar volume do repositório restic (local)
+  community.docker.docker_volume:
+    name: "{{ backup_restic_repo_volume }}"
+
+- name: Gerar dump lógico do MariaDB no volume de dumps
+  community.docker.docker_container_exec:
+    container: "{{ escola_mariadb }}"
+    argv:
+      - sh
+      - -c
+      - mariadb-dump -uroot -p"$MARIADB_ROOT_PASSWORD" --single-transaction --all-databases > /dumps/mariadb.sql
+  when: escola_habilitar_moodle | bool
+  register: backup_restic_dump
+  changed_when: backup_restic_dump.rc == 0
+  failed_when: backup_restic_dump.rc != 0
+
+- name: Executar backup, retenção e verificação com restic
+  community.docker.docker_container:
+    name: "{{ escola_prefixo }}-restic-run"
+    image: "{{ backup_restic_imagem }}"
+    entrypoint: [/bin/sh, -c]
+    command:
+      - |
+        set -eu
+        restic cat config >/dev/null 2>&1 || restic init
+        restic backup --tag "{{ escola_prefixo }}" /data
+        restic forget --tag "{{ escola_prefixo }}" --keep-daily {{ backup_restic_keep_daily }} --keep-weekly {{ backup_restic_keep_weekly }} --keep-monthly {{ backup_restic_keep_monthly }} --prune
+        restic check
+    env:
+      RESTIC_REPOSITORY: /repo
+      RESTIC_PASSWORD: "{{ restic_password }}"
+    volumes:
+      - "{{ backup_restic_repo_volume }}:/repo"
+      - "{{ escola_prefixo }}-dumps:/data/dumps:ro"
+      - "{{ escola_prefixo }}-moodle-dados:/data/moodle-dados:ro"
+      - "{{ escola_prefixo }}-ldap-dados:/data/ldap:ro"
+    detach: false
+    cleanup: true
+    recreate: true
+    state: started
+  register: backup_restic_execucao
+  changed_when: true
+  failed_when: backup_restic_execucao.status | default(1) | int != 0
+  no_log: true

@@ -1,0 +1,25 @@
+---
+# Identificação da escola. Deve coincidir com a chave em var.escolas do Terraform.
+escola_prefixo: escola01
+escola_indice: 0
+
+# Rede criada pelo Terraform. O Ansible apenas se anexa a ela.
+escola_rede_servidores: "{{ escola_prefixo }}-servidores"
+escola_nginx: "{{ escola_prefixo }}-nginx"
+escola_mariadb: "{{ escola_prefixo }}-mariadb"
+escola_habilitar_moodle: true
+
+# OpenLDAP. Tag fixa; verifique a existência no registro antes de executar.
+# As imagens osixia/openldap (2021) e bitnami/openldap (versionadas) não são mais
+# atualizadas: use apenas em laboratório e documente a limitação no TCC.
+ldap_imagem: "bitnamilegacy/openldap:2.6.9"
+ldap_dominio_base: "dc=escola,dc=exemplo,dc=org"
+ldap_admin_dn: "cn=admin,{{ ldap_dominio_base }}"
+ldap_porta_host: "{{ 1389 + (escola_indice | int) }}"
+ldaps_porta_host: "{{ 1636 + (escola_indice | int) }}"
+ldap_ip_publicacao: "127.0.0.1"
+
+# Segredos: sempre referenciam o vault (veja vault.yml.exemplo).
+ldap_admin_password: "{{ vault_ldap_admin_password }}"
+ldap_usuario_exemplo_password: "{{ vault_ldap_usuario_exemplo_password }}"
+restic_password: "{{ vault_restic_password }}"

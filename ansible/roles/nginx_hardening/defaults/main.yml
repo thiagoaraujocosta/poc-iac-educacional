@@ -1,0 +1,3 @@
+---
+nginx_hardening_snippet: /etc/nginx/snippets/10-seguranca.conf
+nginx_hardening_hsts_max_age: 31536000

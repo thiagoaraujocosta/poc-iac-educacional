@@ -1,0 +1,141 @@
+---
+# Medição da PoC no runner do GitHub Actions. Disparo manual (workflow_dispatch).
+# Cada cenário roda em uma máquina virtual própria (matriz), com R repetições dentro do cenário.
+# ATENÇÃO sobre o hardware: em repositório PRIVADO o runner ubuntu-latest tem 2 vCPU e 7 GB de RAM;
+# em repositório PÚBLICO, 4 vCPU e 16 GB. Os cenários grandes (completo_grande_n05) e o perfil leve com
+# 25 e 50 escolas exigem o runner maior. O hardware efetivo é gravado em resultados/ambiente.txt e
+# deve ser declarado no TCC (os tempos são do runner, e não do computador pessoal do autor).
+name: medicao
+
+on:
+  workflow_dispatch:
+    inputs:
+      cenarios:
+        description: 'Lista JSON de cenários (nomes dos arquivos em cenarios/ sem .tfvars.json)'
+        default: '["completo_pequeno_n01","completo_medio_n01","completo_grande_n01"]'
+        required: true
+      repeticoes:
+        description: 'Repetições por cenário'
+        default: '10'
+        required: true
+      cache:
+        description: 'Condição das imagens de contêiner'
+        type: choice
+        options: [com_cache, sem_cache]
+        default: com_cache
+      rodar_deriva:
+        description: 'Rodar também o teste de deriva (10 alterações x repetições)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  TF_BIN: tofu
+  TF_IN_AUTOMATION: "true"
+
+jobs:
+  medir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      matrix:
+        cenario: ${{ fromJSON(inputs.cenarios) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: opentofu/setup-opentofu@v1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar Ansible e dependências
+        run: |
+          pip install --quiet ansible-core docker pandas scipy
+          ansible-galaxy collection install -r ansible/requirements.yml
+
+      - name: Preparar segredos fictícios do Ansible Vault
+        run: |
+          openssl rand -hex 24 > "$RUNNER_TEMP/vault_pass"
+          cp ansible/group_vars/all/vault.yml.exemplo ansible/group_vars/all/vault.yml
+          ansible-vault encrypt --vault-password-file "$RUNNER_TEMP/vault_pass" ansible/group_vars/all/vault.yml
+          echo "VAULT_PASSWORD_FILE=$RUNNER_TEMP/vault_pass" >> "$GITHUB_ENV"
+
+      - name: Registrar ambiente
+        run: |
+          mkdir -p medicao/resultados
+          {
+            echo "cenario: ${{ matrix.cenario }}"
+            echo "cache: ${{ inputs.cache }}"
+            echo "repeticoes: ${{ inputs.repeticoes }}"
+            echo "data_utc: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "runner_imagem: ${ImageOS:-?} ${ImageVersion:-?}"
+            echo "cpu: $(nproc) vCPU; memoria: $(free -m | awk '/Mem:/ {print $2}') MB"
+            echo "docker: $(docker --version)"
+            echo "tofu: $(tofu version | head -n1)"
+            echo "ansible: $(ansible --version | head -n1)"
+          } | tee medicao/resultados/ambiente_${{ matrix.cenario }}.txt
+
+      - name: Aquecimento (baixa as imagens; descartado)
+        if: inputs.cache == 'com_cache'
+        run: |
+          bash medicao/executar_cenario.sh -c cenarios/${{ matrix.cenario }}.tfvars.json -r 1 -d "$RUNNER_TEMP/aquecimento"
+
+      - name: Medir cenário
+        env:
+          PRE_REP_CMD: ${{ inputs.cache == 'sem_cache' && 'docker system prune -af' || '' }}
+        run: |
+          bash medicao/executar_cenario.sh -c cenarios/${{ matrix.cenario }}.tfvars.json -r "${{ inputs.repeticoes }}" -d medicao/resultados
+
+      - name: Teste de deriva
+        if: inputs.rodar_deriva && matrix.cenario == fromJSON(inputs.cenarios)[0]
+        run: bash medicao/drift_test.sh -r "${{ inputs.repeticoes }}" -o medicao/resultados/drift.csv
+
+      - name: Reunir logs e resultados
+        if: always()
+        run: |
+          mkdir -p saida
+          cp -r medicao/resultados/. saida/ 2>/dev/null || true
+          mkdir -p saida/logs && cp -r medicao/logs/. saida/logs/ 2>/dev/null || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: res-${{ matrix.cenario }}-${{ inputs.cache }}
+          path: saida/
+          retention-days: 90
+
+  analisar:
+    needs: medir
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: res-*-${{ inputs.cache }}
+          path: todos
+          merge-multiple: true
+
+      - name: Análise estatística
+        run: |
+          pip install --quiet pandas scipy
+          ls -R todos | head -n 80
+          cd medicao
+          python analise.py --tempos ../todos/*_tempos.csv --idempotencia ../todos/*_idempotencia.csv \
+            --consistencia ../todos/*_consistencia.csv --saida ../todos/analise_cenarios
+          cat ../todos/analise_cenarios*.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: analise-${{ inputs.cache }}
+          path: todos/
+          retention-days: 90

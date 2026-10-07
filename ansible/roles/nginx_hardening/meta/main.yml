@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  author: Thiago Costa
+  description: Aplica cabeçalhos de segurança no Nginx e recarrega a configuração.
+  license: MIT
+  min_ansible_version: "2.15"
+  platforms:
+    - name: GenericLinux
+      versions: [all]
+  galaxy_tags: [docker, iac]
+dependencies: []

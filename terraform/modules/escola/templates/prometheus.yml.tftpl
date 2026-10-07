@@ -1,0 +1,45 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: grafana
+    static_configs:
+      - targets: ["${prefixo}-grafana:3000"]
+
+  # Disponibilidade HTTPS do proxy e do Moodle, medida pelo Blackbox Exporter.
+  - job_name: disponibilidade_http
+    metrics_path: /probe
+    params:
+      module: [http_2xx_insecure]
+    static_configs:
+      - targets:
+          - https://${prefixo}-nginx/healthz
+%{ if habilitar_moodle }
+          - https://${prefixo}-nginx/
+%{ endif }
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: ${prefixo}-blackbox:9115
+
+  # Carga sintética de coleta: um alvo por equipamento da escola (limitado pelo
+  # cenário). Todos apontam para o próprio Blackbox Exporter (que expõe /metrics),
+  # de modo que ficam saudáveis e representam apenas o volume de alvos, não
+  # equipamentos reais.
+%{ if length(alvos) > 0 }
+  - job_name: equipamentos_sinteticos
+    static_configs:
+%{ for alvo in alvos }
+      - targets: ["${prefixo}-blackbox:9115"]
+        labels:
+          equipamento: "${alvo}"
+%{ endfor }
+%{ endif }

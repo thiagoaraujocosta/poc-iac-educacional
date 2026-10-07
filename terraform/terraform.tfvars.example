@@ -1,0 +1,31 @@
+# Exemplo. Copie para terraform.tfvars (ignorado pelo Git). Valores fictícios.
+# docker_host = "npipe:////./pipe/docker_engine" # Windows com Docker Desktop
+
+escolas = {
+  escola01 = {
+    nome   = "Escola Modelo 01"
+    indice = 0
+  }
+  # Para replicar, basta acrescentar blocos como o abaixo:
+  # escola02 = {
+  #   nome   = "Escola Modelo 02"
+  #   indice = 1
+  # }
+}
+
+# Exemplo com os parâmetros opcionais por escola (cenários gerados em ../cenarios/):
+#   rede_base_escolas = "10.64.0.0/12" # necessário para mais de 16 escolas
+#   escolas = {
+#     escola01 = {
+#       nome                = "Escola INEP 00000000" # fictício
+#       indice              = 0
+#       perfil              = "completo"  # ou "leve" (sem Moodle, Prometheus, Blackbox e Grafana)
+#       memoria_mb          = 1024        # limite do Moodle
+#       cpus                = 1           # peso relativo de CPU do Moodle
+#       alvos_monitoramento = 7           # alvos sintéticos no Prometheus
+#       modo_local_first    = false       # true = rede de servidores sem saída externa
+#       porte               = "medio"     # rótulos de rastreabilidade
+#       backup_frequencia   = "diaria"
+#     }
+#   }
+# Uso: terraform apply -var-file=../cenarios/completo_medio_n01.tfvars.json

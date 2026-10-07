@@ -1,0 +1,31 @@
+---
+- name: Consultar o contêiner do proxy
+  community.docker.docker_container_info:
+    name: "{{ escola_nginx }}"
+  register: nginx_hardening_info
+
+- name: Garantir que o proxy existe e está em execução
+  ansible.builtin.assert:
+    that:
+      - nginx_hardening_info.exists
+      - nginx_hardening_info.container.State.Running
+    fail_msg: "O contêiner {{ escola_nginx }} não está em execução. Execute o terraform apply antes."
+
+- name: Gravar o trecho de cabeçalhos de segurança
+  community.docker.docker_container_copy_into:
+    container: "{{ escola_nginx }}"
+    container_path: "{{ nginx_hardening_snippet }}"
+    content: "{{ lookup('ansible.builtin.template', 'seguranca.conf.j2') }}"
+    mode: 0644
+  notify: Recarregar Nginx
+
+- name: Validar a configuração do Nginx
+  community.docker.docker_container_exec:
+    container: "{{ escola_nginx }}"
+    argv: [nginx, -t]
+  register: nginx_hardening_teste
+  changed_when: false
+  failed_when: nginx_hardening_teste.rc != 0
+
+- name: Aplicar recarga pendente
+  ansible.builtin.meta: flush_handlers

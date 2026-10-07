@@ -1,0 +1,8 @@
+---
+tls_cert_dir: "{{ playbook_dir }}/.tls/{{ escola_prefixo }}"
+tls_cert_common_name: "{{ escola_prefixo }}-ldap"
+tls_cert_dias_validade: 365
+tls_cert_alt_names:
+  - "DNS:{{ escola_prefixo }}-ldap"
+  - "DNS:localhost"
+  - "IP:127.0.0.1"

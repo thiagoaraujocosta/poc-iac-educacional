@@ -1,0 +1,10 @@
+title = "PoC IaC educacional"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Arquivo de exemplo com valores fictícios"
+paths = [
+  '''ansible/group_vars/all/vault\.yml\.exemplo''',
+]

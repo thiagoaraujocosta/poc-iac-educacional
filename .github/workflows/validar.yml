@@ -1,0 +1,94 @@
+---
+# Validação estática da PoC: formatação, sintaxe, análise de segurança, segredos e lint.
+# Também registra as versões exatas das ferramentas (insumo da Tabela 4.1 do TCC) e roda o teste de
+# detecção de deficiências plantadas (métrica M4). Nenhum recurso é provisionado aqui.
+name: validar
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: opentofu/setup-opentofu@v1
+
+      - uses: terraform-linters/setup-tflint@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar ferramentas de análise
+        run: |
+          pip install --quiet ansible-core ansible-lint yamllint checkov docker pandas scipy
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.56.2
+          curl -sSL -o gitleaks.tgz https://github.com/gitleaks/gitleaks/releases/download/v8.21.2/gitleaks_8.21.2_linux_x64.tar.gz
+          tar -xzf gitleaks.tgz gitleaks && sudo mv gitleaks /usr/local/bin/ && rm gitleaks.tgz
+          ansible-galaxy collection install -r ansible/requirements.yml
+
+      - name: Registrar versões
+        run: |
+          mkdir -p resultados
+          {
+            echo "data_utc: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "runner_imagem: ${ImageOS:-?} ${ImageVersion:-?}"
+            echo "cpu: $(nproc) vCPU; memoria: $(free -m | awk '/Mem:/ {print $2}') MB"
+            echo "docker: $(docker --version)"
+            echo "tofu: $(tofu version | head -n1)"
+            echo "ansible: $(ansible --version | head -n1)"
+            echo "tflint: $(tflint --version | head -n1)"
+            echo "trivy: $(trivy --version | head -n1)"
+            echo "checkov: $(checkov --version)"
+            echo "ansible-lint: $(ansible-lint --version | head -n1)"
+            echo "yamllint: $(yamllint --version)"
+            echo "gitleaks: $(gitleaks version)"
+            echo "python: $(python --version)"
+          } | tee resultados/versoes.txt
+
+      - name: tofu fmt
+        run: tofu -chdir=terraform fmt -check -recursive -diff
+
+      - name: tofu validate
+        run: |
+          tofu -chdir=terraform init -backend=false -input=false
+          tofu -chdir=terraform validate
+
+      - name: tflint
+        run: |
+          cd terraform
+          tflint --init
+          tflint --recursive --format compact
+
+      - name: trivy config
+        run: trivy config --exit-code 1 --severity HIGH,CRITICAL terraform
+
+      - name: ansible-lint
+        run: |
+          cd ansible
+          ansible-lint site.yml teardown.yml
+
+      - name: yamllint
+        run: yamllint -c .yamllint .
+
+      - name: gitleaks
+        run: gitleaks detect --source . --config .gitleaks.toml --redact --verbose
+
+      - name: Teste de deficiências plantadas (M4)
+        if: always()
+        run: bash medicao/seguranca_plantada.sh -o resultados/seguranca.csv
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: validacao-versoes-seguranca
+          path: resultados/

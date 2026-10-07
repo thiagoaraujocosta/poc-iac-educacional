@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  author: Thiago Costa
+  description: Implanta o OpenLDAP em contêiner com LDAPS e carrega a estrutura LDIF.
+  license: MIT
+  min_ansible_version: "2.15"
+  platforms:
+    - name: GenericLinux
+      versions: [all]
+  galaxy_tags: [docker, iac]
+dependencies: []

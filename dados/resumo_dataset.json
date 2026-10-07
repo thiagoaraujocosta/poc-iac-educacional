@@ -1,0 +1,292 @@
+{
+  "fonte": "Censo Escolar da Educação Básica 2024 - microdados (INEP)",
+  "arquivo": "microdados_ed_basica_2024.csv",
+  "sha256_arquivo": "3fb4d93c714b7d9303e34430f0287ca102bf984a4769d5abaca21eb4d1453bc9",
+  "semente": 20260929,
+  "contagens": {
+    "linhas_arquivo": 215545,
+    "em_atividade": 181065,
+    "estaduais_municipais_em_atividade": 137139,
+    "com_matricula_maior_que_zero": 136136
+  },
+  "quantis_QT_MAT_BAS": {
+    "min": 1.0,
+    "p10": 26.0,
+    "p25": 71.0,
+    "mediana": 176.0,
+    "p75": 371.0,
+    "p90": 646.0,
+    "p99": 1366.0,
+    "max": 16500.0
+  },
+  "quantis_equipamentos": {
+    "min": 0.0,
+    "p10": 0.0,
+    "p25": 0.0,
+    "mediana": 1.0,
+    "p75": 13.0,
+    "p90": 37.0,
+    "p99": 169.0,
+    "max": 177776.0
+  },
+  "percentuais_base_filtrada": {
+    "laboratorio_informatica": 28.74,
+    "internet": 89.9,
+    "internet_aprendizagem": 66.2,
+    "banda_larga": 76.65,
+    "banda_larga_entre_escolas_com_internet": 85.26,
+    "energia_rede_publica": 96.31,
+    "sem_banda_larga_local_first": 23.35
+  },
+  "regras": {
+    "filtros": [
+      "TP_SITUACAO_FUNCIONAMENTO == 1",
+      "TP_DEPENDENCIA in {2, 3}",
+      "QT_MAT_BAS > 0"
+    ],
+    "porte": {
+      "pequeno": "matriculas <= 200",
+      "medio": "201 a 800 matriculas",
+      "grande": "matriculas > 800"
+    },
+    "memoria_moodle_mb": {
+      "pequeno": 512,
+      "medio": 1024,
+      "grande": 2048
+    },
+    "cpus": {
+      "pequeno": 0.5,
+      "medio": 1.0,
+      "grande": 2.0
+    },
+    "alvos_monitoramento": "min(equipamentos, 50), minimo 1; equipamentos = QT_DESKTOP_ALUNO + QT_COMP_PORTATIL_ALUNO",
+    "modo_local_first": "IN_BANDA_LARGA == 0 (ausente conta como 0): rede servidores interna",
+    "backup_frequencia": {
+      "pequeno": "semanal",
+      "medio": "diaria",
+      "grande": "12h"
+    },
+    "valores_ausentes": "indicadores e quantidades ausentes tratados como 0 (escola sem internet costuma ter IN_BANDA_LARGA ausente e cai em local-first)"
+  },
+  "escolas_por_porte": {
+    "pequeno": {
+      "escolas": 74007,
+      "percentual_da_base": 54.36,
+      "matriculas_mediana": 79.0,
+      "equipamentos_mediana": 0.0,
+      "com_laboratorio_pct": 12.69,
+      "com_banda_larga_pct": 66.94,
+      "sem_banda_larga_local_first": 24470
+    },
+    "medio": {
+      "escolas": 53790,
+      "percentual_da_base": 39.51,
+      "matriculas_mediana": 360.0,
+      "equipamentos_mediana": 7.0,
+      "com_laboratorio_pct": 44.34,
+      "com_banda_larga_pct": 87.72,
+      "sem_banda_larga_local_first": 6605
+    },
+    "grande": {
+      "escolas": 8339,
+      "percentual_da_base": 6.13,
+      "matriculas_mediana": 1010.0,
+      "equipamentos_mediana": 25.0,
+      "com_laboratorio_pct": 70.55,
+      "com_banda_larga_pct": 91.5,
+      "sem_banda_larga_local_first": 709
+    }
+  },
+  "cenarios": [
+    {
+      "cenario": "completo_pequeno_n01",
+      "perfil": "completo",
+      "n_escolas": 1,
+      "descricao": "Perfil completo, 1 escola(s) de porte pequeno sorteadas da população real",
+      "portes": {
+        "pequeno": 1,
+        "medio": 0,
+        "grande": 0
+      },
+      "memoria_moodle_mb_total": 512,
+      "memoria_estimada_mb": 1536,
+      "cabe_em_16gb": true,
+      "folga_estimada_mb": 14848
+    },
+    {
+      "cenario": "completo_pequeno_n03",
+      "perfil": "completo",
+      "n_escolas": 3,
+      "descricao": "Perfil completo, 3 escola(s) de porte pequeno sorteadas da população real",
+      "portes": {
+        "pequeno": 3,
+        "medio": 0,
+        "grande": 0
+      },
+      "memoria_moodle_mb_total": 1536,
+      "memoria_estimada_mb": 4608,
+      "cabe_em_16gb": true,
+      "folga_estimada_mb": 11776
+    },
+    {
+      "cenario": "completo_pequeno_n05",
+      "perfil": "completo",
+      "n_escolas": 5,
+      "descricao": "Perfil completo, 5 escola(s) de porte pequeno sorteadas da população real",
+      "portes": {
+        "pequeno": 5,
+        "medio": 0,
+        "grande": 0
+      },
+      "memoria_moodle_mb_total": 2560,
+      "memoria_estimada_mb": 7680,
+      "cabe_em_16gb": true,
+      "folga_estimada_mb": 8704
+    },
+    {
+      "cenario": "completo_medio_n01",
+      "perfil": "completo",
+      "n_escolas": 1,
+      "descricao": "Perfil completo, 1 escola(s) de porte medio sorteadas da população real",
+      "portes": {
+        "pequeno": 0,
+        "medio": 1,
+        "grande": 0
+      },
+      "memoria_moodle_mb_total": 1024,
+      "memoria_estimada_mb": 2048,
+      "cabe_em_16gb": true,
+      "folga_estimada_mb": 14336
+    },
+    {
+      "cenario": "completo_medio_n03",
+      "perfil": "completo",
+      "n_escolas": 3,
+      "descricao": "Perfil completo, 3 escola(s) de porte medio sorteadas da população real",
+      "portes": {
+        "pequeno": 0,
+        "medio": 3,
+        "grande": 0
+      },
+      "memoria_moodle_mb_total": 3072,
+      "memoria_estimada_mb": 6144,
+      "cabe_em_16gb": true,
+      "folga_estimada_mb": 10240
+    },
+    {
+      "cenario": "completo_medio_n05",
+      "perfil": "completo",
+      "n_escolas": 5,
+      "descricao": "Perfil completo, 5 escola(s) de porte medio sorteadas da população real",
+      "portes": {
+        "pequeno": 0,
+        "medio": 5,
+        "grande": 0
+      },
+      "memoria_moodle_mb_total": 5120,
+      "memoria_estimada_mb": 10240,
+      "cabe_em_16gb": true,
+      "folga_estimada_mb": 6144
+    },
+    {
+      "cenario": "completo_grande_n01",
+      "perfil": "completo",
+      "n_escolas": 1,
+      "descricao": "Perfil completo, 1 escola(s) de porte grande sorteadas da população real",
+      "portes": {
+        "pequeno": 0,
+        "medio": 0,
+        "grande": 1
+      },
+      "memoria_moodle_mb_total": 2048,
+      "memoria_estimada_mb": 3072,
+      "cabe_em_16gb": true,
+      "folga_estimada_mb": 13312
+    },
+    {
+      "cenario": "completo_grande_n03",
+      "perfil": "completo",
+      "n_escolas": 3,
+      "descricao": "Perfil completo, 3 escola(s) de porte grande sorteadas da população real",
+      "portes": {
+        "pequeno": 0,
+        "medio": 0,
+        "grande": 3
+      },
+      "memoria_moodle_mb_total": 6144,
+      "memoria_estimada_mb": 9216,
+      "cabe_em_16gb": true,
+      "folga_estimada_mb": 7168
+    },
+    {
+      "cenario": "completo_grande_n05",
+      "perfil": "completo",
+      "n_escolas": 5,
+      "descricao": "Perfil completo, 5 escola(s) de porte grande sorteadas da população real",
+      "portes": {
+        "pequeno": 0,
+        "medio": 0,
+        "grande": 5
+      },
+      "memoria_moodle_mb_total": 10240,
+      "memoria_estimada_mb": 15360,
+      "cabe_em_16gb": true,
+      "folga_estimada_mb": 1024
+    },
+    {
+      "cenario": "leve_n01",
+      "perfil": "leve",
+      "n_escolas": 1,
+      "descricao": "Perfil leve, 1 escola(s) sorteadas da população inteira (escalabilidade)",
+      "portes": {
+        "pequeno": 0,
+        "medio": 1,
+        "grande": 0
+      }
+    },
+    {
+      "cenario": "leve_n05",
+      "perfil": "leve",
+      "n_escolas": 5,
+      "descricao": "Perfil leve, 5 escola(s) sorteadas da população inteira (escalabilidade)",
+      "portes": {
+        "pequeno": 4,
+        "medio": 1,
+        "grande": 0
+      }
+    },
+    {
+      "cenario": "leve_n10",
+      "perfil": "leve",
+      "n_escolas": 10,
+      "descricao": "Perfil leve, 10 escola(s) sorteadas da população inteira (escalabilidade)",
+      "portes": {
+        "pequeno": 6,
+        "medio": 3,
+        "grande": 1
+      }
+    },
+    {
+      "cenario": "leve_n25",
+      "perfil": "leve",
+      "n_escolas": 25,
+      "descricao": "Perfil leve, 25 escola(s) sorteadas da população inteira (escalabilidade)",
+      "portes": {
+        "pequeno": 14,
+        "medio": 9,
+        "grande": 2
+      }
+    },
+    {
+      "cenario": "leve_n50",
+      "perfil": "leve",
+      "n_escolas": 50,
+      "descricao": "Perfil leve, 50 escola(s) sorteadas da população inteira (escalabilidade)",
+      "portes": {
+        "pequeno": 28,
+        "medio": 20,
+        "grande": 2
+      }
+    }
+  ]
+}

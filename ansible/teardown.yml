@@ -1,0 +1,29 @@
+---
+# Remove o que o Ansible criou, para que "terraform destroy" consiga apagar as
+# redes (que ficariam em uso pelo contêiner LDAP). Usado nas medições.
+- name: Remover recursos criados pelo Ansible
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Remover contêineres criados pelo Ansible
+      community.docker.docker_container:
+        name: "{{ item }}"
+        state: absent
+        force_kill: true
+      loop:
+        - "{{ escola_prefixo }}-ldap"
+        - "{{ escola_prefixo }}-restic-run"
+
+    - name: Remover volumes criados pelo Ansible
+      community.docker.docker_volume:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ escola_prefixo }}-ldap-dados"
+        - "{{ escola_prefixo }}-ldap-certs"
+        - "{{ escola_prefixo }}-backup-repo"
+
+    - name: Remover certificados gerados na máquina de controle
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/.tls/{{ escola_prefixo }}"
+        state: absent

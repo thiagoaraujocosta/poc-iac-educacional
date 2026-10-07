@@ -1,0 +1,38 @@
+---
+# Certificado autoassinado para o LDAPS. O certificado do Nginx é gerado pelo
+# Terraform (provedor tls); veja a justificativa no README.
+- name: Criar diretório dos certificados
+  ansible.builtin.file:
+    path: "{{ tls_cert_dir }}"
+    state: directory
+    mode: "0700"
+
+- name: Gerar chave privada
+  community.crypto.openssl_privatekey:
+    path: "{{ tls_cert_dir }}/tls.key"
+    type: RSA
+    size: 2048
+    mode: "0600"
+
+- name: Gerar requisição de certificado (CSR)
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: "{{ tls_cert_dir }}/tls.key"
+    common_name: "{{ tls_cert_common_name }}"
+    subject_alt_name: "{{ tls_cert_alt_names }}"
+  register: tls_cert_csr
+
+- name: Gerar certificado autoassinado
+  community.crypto.x509_certificate:
+    path: "{{ tls_cert_dir }}/tls.crt"
+    csr_content: "{{ tls_cert_csr.csr }}"
+    privatekey_path: "{{ tls_cert_dir }}/tls.key"
+    provider: selfsigned
+    selfsigned_not_after: "+{{ tls_cert_dias_validade }}d"
+    mode: "0644"
+
+- name: Usar o próprio certificado como CA (ambiente de laboratório)
+  ansible.builtin.copy:
+    src: "{{ tls_cert_dir }}/tls.crt"
+    dest: "{{ tls_cert_dir }}/ca.crt"
+    remote_src: true
+    mode: "0644"

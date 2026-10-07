@@ -1,0 +1,6 @@
+---
+backup_restic_imagem: "restic/restic:0.17.3"
+backup_restic_repo_volume: "{{ escola_prefixo }}-backup-repo"
+backup_restic_keep_daily: 7
+backup_restic_keep_weekly: 4
+backup_restic_keep_monthly: 6

@@ -1,0 +1,6 @@
+---
+- name: Recarregar Nginx
+  community.docker.docker_container_exec:
+    container: "{{ escola_nginx }}"
+    argv: [nginx, -s, reload]
+  changed_when: true

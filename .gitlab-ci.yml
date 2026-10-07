@@ -1,0 +1,198 @@
+---
+# Pipeline da PoC. Pensado para um GitLab Runner local (executor docker) com o
+# soquete do Docker montado (volumes = ["/var/run/docker.sock:/var/run/docker.sock"])
+# e um diretório persistente para o state (${TF_STATE_DIR}), pois o backend padrão
+# é local. Veja terraform/backend.tf para a alternativa com backend remoto.
+# As tags de imagem abaixo devem ser verificadas antes do primeiro uso.
+
+stages:
+  - validate
+  - plan
+  - aprovacao
+  - apply
+  - drift
+
+variables:
+  TF_DIR: terraform
+  TF_STATE_DIR: /srv/iac-estado
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "0"
+  PLAN_FILE: tfplan
+
+# Pipelines de merge request e da branch padrão; o agendamento só dispara o drift-check.
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $DRIFT_CHECK == "true"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+
+.terraform:
+  image:
+    name: hashicorp/terraform:1.9.8
+    entrypoint: [""]
+  before_script:
+    - cd "$TF_DIR"
+    - terraform init -input=false -backend-config="path=${TF_STATE_DIR}/terraform.tfstate"
+
+.nao_agendado:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - when: on_success
+
+# ----------------------------------------------------------------- validate
+terraform-fmt:
+  stage: validate
+  extends: [.nao_agendado]
+  image:
+    name: hashicorp/terraform:1.9.8
+    entrypoint: [""]
+  script:
+    - terraform -chdir="$TF_DIR" fmt -check -recursive -diff
+
+terraform-validate:
+  stage: validate
+  extends: [.nao_agendado]
+  image:
+    name: hashicorp/terraform:1.9.8
+    entrypoint: [""]
+  script:
+    - terraform -chdir="$TF_DIR" init -backend=false -input=false
+    - terraform -chdir="$TF_DIR" validate
+
+tflint:
+  stage: validate
+  extends: [.nao_agendado]
+  image:
+    name: ghcr.io/terraform-linters/tflint:v0.53.0
+    entrypoint: [""]
+  script:
+    - cd "$TF_DIR"
+    - tflint --init
+    - tflint --recursive --format compact
+
+# Análise estática de configuração (segurança). Alternativa: checkov -d terraform
+trivy-config:
+  stage: validate
+  extends: [.nao_agendado]
+  image:
+    name: aquasec/trivy:0.56.2
+    entrypoint: [""]
+  script:
+    - trivy config --exit-code 1 --severity HIGH,CRITICAL "$TF_DIR"
+
+ansible-lint:
+  stage: validate
+  extends: [.nao_agendado]
+  image: python:3.12-slim
+  script:
+    - pip install --quiet ansible-core ansible-lint
+    - cd ansible
+    - ansible-galaxy collection install -r requirements.yml
+    - ansible-lint site.yml teardown.yml
+
+yamllint:
+  stage: validate
+  extends: [.nao_agendado]
+  image: python:3.12-slim
+  script:
+    - pip install --quiet yamllint
+    - yamllint -c .yamllint .
+
+gitleaks:
+  stage: validate
+  extends: [.nao_agendado]
+  image:
+    name: zricethezav/gitleaks:v8.21.2
+    entrypoint: [""]
+  script:
+    - gitleaks detect --source . --config .gitleaks.toml --redact --verbose
+
+# --------------------------------------------------------------------- plan
+plan:
+  stage: plan
+  extends: [.terraform]
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - when: on_success
+  script:
+    # Código de saída: 0 = sem mudanças, 1 = erro, 2 = há mudanças.
+    - set +e
+    - terraform plan -detailed-exitcode -out="$PLAN_FILE"
+    - CODIGO=$?
+    - set -e
+    - if [ "$CODIGO" -eq 1 ]; then exit 1; fi
+    - terraform show -no-color "$PLAN_FILE" > plano.txt
+    - echo "Código do plan = $CODIGO (0 sem mudanças, 2 com mudanças)"
+  artifacts:
+    when: on_success
+    expire_in: 1 week
+    paths:
+      - $TF_DIR/$PLAN_FILE
+      - $TF_DIR/plano.txt
+
+# --------------------------------------------------------------- aprovação
+# Aprovação manual. Configure o ambiente "producao" como protegido em
+# Settings > CI/CD > Protected environments, com aprovadores definidos.
+#
+# Alternativa para equipes de uma pessoa (sem segundo aprovador): substituir a
+# aprovação humana por uma política automática com OPA/Conftest sobre o plano:
+#   terraform show -json tfplan > plano.json
+#   conftest test plano.json --policy politicas/
+# (por exemplo, negar portas publicadas em 0.0.0.0 ou volumes sem prefixo).
+aprovar:
+  stage: aprovacao
+  image: alpine:3.20
+  needs: [plan]
+  environment:
+    name: producao
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
+      when: manual
+      allow_failure: false
+  script:
+    - echo "Plano aprovado manualmente por ${GITLAB_USER_LOGIN}."
+
+# -------------------------------------------------------------------- apply
+apply:
+  stage: apply
+  extends: [.terraform]
+  needs: [plan, aprovar]
+  environment:
+    name: producao
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
+  script:
+    - terraform apply -input=false "$PLAN_FILE"
+
+configurar-ansible:
+  stage: apply
+  image: python:3.12-slim
+  needs: [apply]
+  environment:
+    name: producao
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
+  script:
+    # ANSIBLE_VAULT_PASSWORD_FILE deve ser uma variável CI/CD do tipo File, mascarada e protegida.
+    - pip install --quiet ansible-core docker
+    - cd ansible
+    - ansible-galaxy collection install -r requirements.yml
+    - ansible-playbook site.yml --vault-password-file "$ANSIBLE_VAULT_PASSWORD_FILE"
+
+# -------------------------------------------------------------------- drift
+# Job agendado (Build > Pipeline schedules, variável DRIFT_CHECK=true).
+# Falha quando o plan detecta diferença entre o código e o ambiente real.
+drift-check:
+  stage: drift
+  extends: [.terraform]
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $DRIFT_CHECK == "true"'
+  script:
+    - set +e
+    - terraform plan -detailed-exitcode -lock=false
+    - CODIGO=$?
+    - set -e
+    - if [ "$CODIGO" -eq 2 ]; then echo "DRIFT DETECTADO (exit code 2)"; exit 2; fi
+    - exit "$CODIGO"
