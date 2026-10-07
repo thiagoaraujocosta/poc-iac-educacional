@@ -166,8 +166,10 @@ resource "docker_container" "mariadb" {
   image   = docker_image.imagens["mariadb"].image_id
   restart = "unless-stopped"
 
-  # Memória em MB (null = sem limite).
-  memory = local.memoria_mariadb_mb
+  # Memória em MB (null = sem limite). memory_swap igual a memory desliga o swap; sem isso o Docker
+  # define memory_swap por conta própria e o plano passa a mostrar uma mudança a cada execução.
+  memory      = local.memoria_mariadb_mb
+  memory_swap = local.memoria_mariadb_mb
 
   command = concat(
     [
@@ -230,8 +232,9 @@ resource "docker_container" "moodle" {
 
   # Memória em MB e peso relativo de CPU (1 CPU = 1024 shares). Null = sem limite.
   # cpu_shares é uma prioridade relativa sob disputa, não um teto rígido de CPU.
-  memory     = var.memoria_mb
-  cpu_shares = local.cpu_shares_moodle
+  memory      = var.memoria_mb
+  memory_swap = var.memoria_mb
+  cpu_shares  = local.cpu_shares_moodle
 
   env = [
     "MOODLE_DATABASE_TYPE=mariadb",

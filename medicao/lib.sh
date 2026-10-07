@@ -2,7 +2,7 @@
 # Funções comuns dos scripts de medição. Faça "source" deste arquivo.
 # Requer bash 4+, awk, date com suporte a %N (GNU coreutils; Linux ou WSL).
 
-export LC_ALL=C   # garante ponto decimal nos CSV
+export LC_ALL=C.UTF-8   # ponto decimal nos CSV e codificação UTF-8 exigida pelo Ansible
 
 MEDICAO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RAIZ_DIR="$(cd "$MEDICAO_DIR/.." && pwd)"
@@ -89,5 +89,5 @@ smoke_escola() {
     SMOKE_PERFIL="${4:-completo}" ESCOLA_PREFIXO="$1" PORTA_HTTPS="$((${PORTA_BASE_HTTPS:-8443} + $2))" \
         PORTA_GRAFANA="$((${PORTA_BASE_GRAFANA:-3000} + $2))" \
         PORTA_PROMETHEUS="$((${PORTA_BASE_PROMETHEUS:-9090} + $2))" \
-        SMOKE_MOODLE="$3" "$MEDICAO_DIR/smoke_tests.sh"
+        SMOKE_MOODLE="$3" bash "$MEDICAO_DIR/smoke_tests.sh"
 }
