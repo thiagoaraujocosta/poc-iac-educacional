@@ -67,6 +67,14 @@ else
 fi
 
 if (( falhas > 0 )); then
+    # Diagnóstico: últimas linhas dos contêineres e respostas do proxy (ajuda a achar a causa da falha).
+    for c in moodle nginx mariadb; do
+        echo "--- docker logs ${PREFIXO}-${c} (últimas 60 linhas)"
+        docker logs --tail 60 "${PREFIXO}-${c}" 2>&1 || true
+    done
+    echo "--- resposta do proxy em /"
+    curl -ksi --max-time 10 "https://localhost:${HTTPS}/" 2>&1 | head -n 15 || true
+    docker ps -a --format '{{.Names}}	{{.Status}}' | grep "^${PREFIXO}-" || true
     echo "Resultado: ${falhas} teste(s) falharam."
     exit 1
 fi
