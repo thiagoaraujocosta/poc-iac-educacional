@@ -247,9 +247,7 @@ resource "docker_container" "moodle" {
     "MOODLE_PASSWORD=${random_password.segredos["moodle_admin"].result}",
     "MOODLE_EMAIL=admin@${var.dominio}.invalid",
     "MOODLE_SITE_NAME=${var.nome_escola}",
-    # Sem porta: com MOODLE_REVERSEPROXY=yes o Moodle compara o host e a porta da requisição com o wwwroot, e
-    # atrás do proxy a porta vista pelo Moodle (8080) nunca bate com a porta publicada no host.
-    "MOODLE_HOST=${var.dominio}",
+    "MOODLE_HOST=${var.dominio}:${var.porta_https}",
     "MOODLE_REVERSEPROXY=yes",
     "MOODLE_SSLPROXY=yes",
   ]
