@@ -24,7 +24,7 @@
     container_path: "{{ openldap_certs_dir_container }}/{{ item }}"
     owner_id: 1001
     group_id: 1001
-    mode: 0600
+    mode: "0600"
   loop:
     - tls.crt
     - tls.key
@@ -59,7 +59,7 @@
     container: "{{ openldap_nome }}"
     container_path: /tmp/estrutura.ldif
     content: "{{ lookup('ansible.builtin.template', 'estrutura.ldif.j2') }}"
-    mode: 0644
+    mode: "0644"
   no_log: true
 
 # ldapadd -c continua após erros; o código 68 significa "entrada já existe",

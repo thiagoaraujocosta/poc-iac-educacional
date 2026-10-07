@@ -25,7 +25,7 @@
         set -eu
         restic cat config >/dev/null 2>&1 || restic init
         restic backup --tag "{{ escola_prefixo }}" /data
-        restic forget --tag "{{ escola_prefixo }}" --keep-daily {{ backup_restic_keep_daily }} --keep-weekly {{ backup_restic_keep_weekly }} --keep-monthly {{ backup_restic_keep_monthly }} --prune
+        restic forget --tag "{{ escola_prefixo }}" \n          --keep-daily {{ backup_restic_keep_daily }} \n          --keep-weekly {{ backup_restic_keep_weekly }} \n          --keep-monthly {{ backup_restic_keep_monthly }} --prune
         restic check
     env:
       RESTIC_REPOSITORY: /repo

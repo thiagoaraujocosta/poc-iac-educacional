@@ -16,7 +16,7 @@
     container: "{{ escola_nginx }}"
     container_path: "{{ nginx_hardening_snippet }}"
     content: "{{ lookup('ansible.builtin.template', 'seguranca.conf.j2') }}"
-    mode: 0644
+    mode: "0644"
   notify: Recarregar Nginx
 
 - name: Validar a configuração do Nginx

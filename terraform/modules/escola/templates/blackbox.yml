@@ -1,3 +1,4 @@
+---
 modules:
   # O certificado do proxy é autoassinado; a verificação é desligada só na sonda.
   http_2xx_insecure:
