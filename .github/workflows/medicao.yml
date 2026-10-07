@@ -60,8 +60,11 @@ jobs:
           python-version: "3.12"
 
       - name: Instalar Ansible e dependências
+        timeout-minutes: 15
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq ldap-utils
+          sudo -E apt-get update -qq && sudo -E apt-get install -y -qq ldap-utils
           pip install --quiet ansible-core docker pandas scipy
           ansible-galaxy collection install -r ansible/requirements.yml
 
