@@ -60,13 +60,13 @@ senha_plantada_api: "%s0123456789abcdefghijklmnopqrstuvwxyzAB"
 ' "$pre" >> "$d/ansible/group_vars/all/vars.yml"
             ;;
         porta_todas_interfaces)
-            find "$d/terraform" -name '*.tf' -print0 | xargs -0 sed -i 's/ip *= *"127\.0\.0\.1"/ip = "0.0.0.0"/g'
+            find "$d/terraform" -name 'variables.tf' -print0 | xargs -0 sed -i 's/default     = "127\.0\.0\.1"/default     = "0.0.0.0"/'
             ;;
         tls_desabilitado)
             find "$d/terraform" -name '*.tftpl' -print0 | xargs -0 sed -i 's/listen 443 ssl/listen 443/g; s/^ *ssl_certificate.*$//; s/^ *ssl_certificate_key.*$//'
             ;;
         imagem_sem_versao)
-            find "$d/terraform" -name 'variables.tf' -print0 | xargs -0 sed -i -E '0,/default *= *"[^"]+:[^"]+"/s//default = "nginx:latest"/'
+            find "$d/terraform" -name 'variables.tf' -path '*modules*' -print0 | xargs -0 sed -i 's/nginx *= *"nginx:[^"]*"/nginx      = "nginx:latest"/'
             ;;
         conteiner_superusuario)
             find "$d/terraform" -name 'main.tf' -path '*modules*' -print0 | xargs -0 sed -i '0,/resource "docker_container" "nginx" {/s//resource "docker_container" "nginx" {\n  privileged = true\n  user       = "root"/'
