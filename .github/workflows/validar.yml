@@ -31,8 +31,9 @@ jobs:
       - name: Instalar ferramentas de análise
         run: |
           pip install --quiet ansible-core ansible-lint yamllint checkov docker pandas scipy
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin v0.56.2
-          curl -sSL -o gitleaks.tgz https://github.com/gitleaks/gitleaks/releases/download/v8.21.2/gitleaks_8.21.2_linux_x64.tar.gz
+          curl -fsSL -o trivy.tgz https://github.com/aquasecurity/trivy/releases/download/v0.75.0/trivy_0.75.0_Linux-64bit.tar.gz
+          tar -xzf trivy.tgz trivy && sudo mv trivy /usr/local/bin/ && rm trivy.tgz
+          curl -fsSL -o gitleaks.tgz https://github.com/gitleaks/gitleaks/releases/download/v8.21.2/gitleaks_8.21.2_linux_x64.tar.gz
           tar -xzf gitleaks.tgz gitleaks && sudo mv gitleaks /usr/local/bin/ && rm gitleaks.tgz
           ansible-galaxy collection install -r ansible/requirements.yml
 
