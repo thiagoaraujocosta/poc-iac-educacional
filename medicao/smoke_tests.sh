@@ -78,6 +78,11 @@ if (( falhas > 0 )); then
     curl -ks --max-time 10 "https://localhost:${HTTPS}/" 2>&1 | tr '
 ' ' ' | sed 's/<style.*<\/style>//; s/<[^>]*>/ /g' | tr -s ' ' | head -c 1500 || true
     echo
+    echo "--- Moodle através do proxy com diferentes cabeçalhos Host"
+    for h in "localhost" "localhost:${HTTPS}" "${PREFIXO}-nginx"; do
+        printf '%s -> ' "$h"; curl -ks -o /dev/null -w '%{http_code}
+' --max-time 10 -H "Host: $h" "https://localhost:${HTTPS}/"
+    done
     echo "--- Moodle direto (rede de servidores), com o mesmo Host"
     docker exec "${PREFIXO}-moodle" sh -c 'curl -s -H "Host: localhost:'"${HTTPS}"'" -H "X-Forwarded-Proto: https" -o /dev/null -w "%{http_code}
 " http://localhost:8080/' 2>&1 || true

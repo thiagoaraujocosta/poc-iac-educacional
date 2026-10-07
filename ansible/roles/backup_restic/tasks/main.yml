@@ -3,6 +3,15 @@
   community.docker.docker_volume:
     name: "{{ backup_restic_repo_volume }}"
 
+- name: Aguardar o Moodle concluir a instalação (evita copiar um banco em mudança)
+  ansible.builtin.command: docker logs "{{ escola_prefixo }}-moodle"
+  register: backup_moodle_logs
+  until: "'Moodle setup finished' in (backup_moodle_logs.stdout + backup_moodle_logs.stderr)"
+  retries: 120
+  delay: 5
+  changed_when: false
+  when: escola_habilitar_moodle | bool
+
 - name: Gerar dump lógico do MariaDB no volume de dumps
   community.docker.docker_container_exec:
     container: "{{ escola_mariadb }}"
