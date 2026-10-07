@@ -73,7 +73,15 @@ if (( falhas > 0 )); then
         docker logs --tail 60 "${PREFIXO}-${c}" 2>&1 || true
     done
     echo "--- resposta do proxy em /"
-    curl -ksi --max-time 10 "https://localhost:${HTTPS}/" 2>&1 | head -n 15 || true
+    curl -ksi --max-time 10 "https://localhost:${HTTPS}/" 2>&1 | head -n 40 | cut -c1-300 || true
+    echo "--- corpo da resposta (texto sem marcação)"
+    curl -ks --max-time 10 "https://localhost:${HTTPS}/" 2>&1 | sed 's/<[^>]*>/ /g' | tr -s ' 
+' | head -c 1500 || true
+    echo
+    echo "--- Moodle direto (rede de servidores), com o mesmo Host"
+    docker exec "${PREFIXO}-moodle" sh -c 'curl -s -H "Host: localhost:'"${HTTPS}"'" -H "X-Forwarded-Proto: https" -o /dev/null -w "%{http_code}
+" http://localhost:8080/' 2>&1 || true
+    docker exec "${PREFIXO}-moodle" sh -c 'tail -n 20 /opt/bitnami/apache/logs/error_log 2>/dev/null; ls /bitnami/moodledata 2>/dev/null | head' 2>&1 || true
     docker ps -a --format '{{.Names}}	{{.Status}}' | grep "^${PREFIXO}-" || true
     echo "Resultado: ${falhas} teste(s) falharam."
     exit 1
