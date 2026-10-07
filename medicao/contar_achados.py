@@ -48,7 +48,34 @@ def contar(ferramenta, dados):
     raise SystemExit("Ferramenta desconhecida: " + ferramenta)
 
 
+def ids(ferramenta, dados):
+    """Identificadores únicos das regras que dispararam (para auditar o que foi detectado)."""
+    if dados is None:
+        return set()
+    r = set()
+    if ferramenta == "tflint":
+        r = {i.get("rule", {}).get("name", "?") for i in dados.get("issues", [])}
+    elif ferramenta == "trivy":
+        for x in dados.get("Results", []) or []:
+            r |= {m.get("ID", "?") for m in (x.get("Misconfigurations") or [])}
+            r |= {m.get("RuleID", "?") for m in (x.get("Secrets") or [])}
+    elif ferramenta == "checkov":
+        for it in (dados if isinstance(dados, list) else [dados]):
+            r |= {c.get("check_id", "?") for c in (((it.get("results") or {}).get("failed_checks")) or [])}
+    elif ferramenta == "ansible-lint":
+        r = {i.get("check_name", "?") for i in dados} if isinstance(dados, list) else set()
+    elif ferramenta == "gitleaks":
+        r = {i.get("RuleID", "?") for i in dados} if isinstance(dados, list) else set()
+    return r
+
+
 if __name__ == "__main__":
+    if len(sys.argv) == 5 and sys.argv[1] == "novos":
+        # novos FERRAMENTA BASE.json PLANTADA.json -> regras que aparecem só na versão com a deficiência
+        f_ = sys.argv[2]
+        novos = sorted(ids(f_, carregar(sys.argv[4])) - ids(f_, carregar(sys.argv[3])))
+        print(";".join(novos))
+        raise SystemExit(0)
     if len(sys.argv) != 3:
         raise SystemExit(__doc__)
     print(contar(sys.argv[1], carregar(sys.argv[2])))

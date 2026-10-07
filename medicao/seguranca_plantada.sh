@@ -20,7 +20,7 @@ PY="${PY:-$(command -v python3 || command -v python)}"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$(dirname "$SAIDA")"
-[[ -s "$SAIDA" ]] || echo "deficiencia,ferramenta,achados_base,achados_plantada,detectada" > "$SAIDA"
+[[ -s "$SAIDA" ]] || echo "deficiencia,mutacao_aplicada,ferramenta,achados_base,achados_plantada,regras_novas,detectada" > "$SAIDA"
 
 FERRAMENTAS=(tflint trivy checkov ansible-lint gitleaks)
 
@@ -55,7 +55,9 @@ plantar() {
     case "$id" in
         senha_texto_puro)
             printf '\nvariable "senha_exemplo_plantada" {\n  default = "SenhaPlantada#2026!AbCdEfGhIj"\n}\n' >> "$d/terraform/variables.tf"
-            printf '\nsenha_plantada_api: "ghp_FICTICIO_PARA_TESTE_DE_DETECCAO"\n' >> "$d/ansible/group_vars/all/vars.yml"
+            local pre="ghp""_"; printf '
+senha_plantada_api: "%s0123456789abcdefghijklmnopqrstuvwxyzAB"
+' "$pre" >> "$d/ansible/group_vars/all/vars.yml"
             ;;
         porta_todas_interfaces)
             find "$d/terraform" -name '*.tf' -print0 | xargs -0 sed -i 's/ip *= *"127\.0\.0\.1"/ip = "0.0.0.0"/g'
@@ -89,16 +91,28 @@ done
 for id in "${DEFICIENCIAS[@]}"; do
     preparar "$TMP/$id"
     plantar "$id" "$TMP/$id"
+    # Confirma que a deficiência foi realmente plantada (senão o resultado seria um falso negativo).
+    if diff -rq "$TMP/base" "$TMP/$id" > /dev/null 2>&1; then aplicada="nao"; else aplicada="sim"; fi
+    echo "== $id (mutação aplicada: $aplicada)"
     for f in "${FERRAMENTAS[@]}"; do
         if [[ "${BASE[$f]}" == "ausente" ]]; then
-            echo "$id,$f,ausente,ausente,ausente" >> "$SAIDA"
+            echo "$id,$aplicada,$f,ausente,ausente,,ausente" >> "$SAIDA"
             continue
         fi
         rodar "$f" "$TMP/$id" "$TMP/${id}_$f.json"
         n="$(contar "$f" "$TMP/${id}_$f.json")"
-        det="nao"; [[ "$n" -gt "${BASE[$f]}" ]] && det="sim"
-        echo "$id,$f,${BASE[$f]},$n,$det" >> "$SAIDA"
-        echo "  $id / $f: base=${BASE[$f]} plantada=$n detectada=$det"
+        novos="$("$PY" "$MEDICAO_DIR/contar_achados.py" novos "$f" "$TMP/base_$f.json" "$TMP/${id}_$f.json")"
+        if [[ "$aplicada" == "nao" ]]; then
+            det="n/a"
+        elif [[ -n "$novos" || "$n" -gt "${BASE[$f]}" ]]; then
+            det="sim"
+        else
+            det="nao"
+        fi
+        echo "$id,$aplicada,$f,${BASE[$f]},$n,\"$novos\",$det" >> "$SAIDA"
+        echo "  $f: base=${BASE[$f]} plantada=$n regras novas=[$novos] detectada=$det"
     done
+    # guarda a diferença aplicada, para auditoria
+    diff -r "$TMP/base" "$TMP/$id" > "$(dirname "$SAIDA")/seguranca_diff_$id.txt" 2>&1 || true
 done
 echo "Concluído. CSV: $SAIDA"
