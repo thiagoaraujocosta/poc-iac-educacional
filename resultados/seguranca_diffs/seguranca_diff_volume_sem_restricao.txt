@@ -1,0 +1,6 @@
+diff -r /tmp/tmp.6sDJKUPs8j/base/terraform/modules/escola/main.tf /tmp/tmp.6sDJKUPs8j/volume_sem_restricao/terraform/modules/escola/main.tf
+278a279,282
+>   volumes {
+>     host_path      = "/var/run/docker.sock"
+>     container_path = "/var/run/docker.sock"
+>   }

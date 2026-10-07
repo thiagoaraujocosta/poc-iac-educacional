@@ -1,0 +1,10 @@
+diff -r /tmp/tmp.6sDJKUPs8j/base/terraform/modules/escola/variables.tf /tmp/tmp.6sDJKUPs8j/porta_todas_interfaces/terraform/modules/escola/variables.tf
+35c35
+<   default     = "127.0.0.1"
+---
+>   default     = "0.0.0.0"
+diff -r /tmp/tmp.6sDJKUPs8j/base/terraform/variables.tf /tmp/tmp.6sDJKUPs8j/porta_todas_interfaces/terraform/variables.tf
+92c92
+<   default     = "127.0.0.1"
+---
+>   default     = "0.0.0.0"

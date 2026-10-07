@@ -1,0 +1,13 @@
+data_utc: 2026-10-07T21:32:10Z
+runner_imagem: ubuntu24 20260927.320.1
+cpu: 2 vCPU; memoria: 7938 MB
+docker: Docker version 28.0.4, build b8034c0
+tofu: OpenTofu v1.13.1
+ansible: ansible [core 2.21.5]
+tflint: TFLint version 0.64.0
+trivy: Version: 0.75.0
+checkov: 3.3.26
+ansible-lint: ansible-lint 26.9.0 using ansible-core:2.21.5 ansible-compat:26.9.0 ruamel-yaml:0.19.1
+yamllint: yamllint 1.38.0
+gitleaks: 8.21.2
+python: Python 3.12.14

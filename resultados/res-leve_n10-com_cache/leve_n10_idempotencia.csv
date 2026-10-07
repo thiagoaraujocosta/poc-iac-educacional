@@ -1,0 +1,11 @@
+run_id,cenario,porte,n,plan_exit_code,recursos_a_alterar,apply2_adicionados,apply2_alterados,apply2_destruidos
+run_01,leve_n10,misto,10,0,0,0,0,0
+run_02,leve_n10,misto,10,0,0,0,0,0
+run_03,leve_n10,misto,10,0,0,0,0,0
+run_04,leve_n10,misto,10,0,0,0,0,0
+run_05,leve_n10,misto,10,0,0,0,0,0
+run_06,leve_n10,misto,10,0,0,0,0,0
+run_07,leve_n10,misto,10,0,0,0,0,0
+run_08,leve_n10,misto,10,0,0,0,0,0
+run_09,leve_n10,misto,10,0,0,0,0,0
+run_10,leve_n10,misto,10,0,0,0,0,0

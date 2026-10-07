@@ -1,0 +1,9 @@
+cenario: completo_medio_n01
+cache: sem_cache
+repeticoes: 10
+data_utc: 2026-10-07T21:30:18Z
+runner_imagem: ubuntu24 20260927.320.1
+cpu: 2 vCPU; memoria: 7938 MB
+docker: Docker version 28.0.4, build b8034c0
+tofu: OpenTofu v1.13.1
+ansible: ansible [core 2.21.5]

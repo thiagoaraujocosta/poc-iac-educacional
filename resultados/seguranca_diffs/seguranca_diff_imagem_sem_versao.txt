@@ -1,0 +1,5 @@
+diff -r /tmp/tmp.6sDJKUPs8j/base/terraform/modules/escola/variables.tf /tmp/tmp.6sDJKUPs8j/imagem_sem_versao/terraform/modules/escola/variables.tf
+152c152
+<     nginx      = "nginx:1.27.3-alpine"
+---
+>     nginx      = "nginx:latest"

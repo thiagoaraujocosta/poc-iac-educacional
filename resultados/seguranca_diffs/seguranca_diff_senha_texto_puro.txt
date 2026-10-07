@@ -1,0 +1,10 @@
+diff -r /tmp/tmp.6sDJKUPs8j/base/ansible/group_vars/all/vars.yml /tmp/tmp.6sDJKUPs8j/senha_texto_puro/ansible/group_vars/all/vars.yml
+25a26,27
+> 
+> senha_plantada_api: "ghp_FICTICIO_PARA_TESTE_DE_DETECCAO"
+diff -r /tmp/tmp.6sDJKUPs8j/base/terraform/variables.tf /tmp/tmp.6sDJKUPs8j/senha_texto_puro/terraform/variables.tf
+111a112,115
+> 
+> variable "senha_exemplo_plantada" {
+>   default = "SenhaPlantada#2026!AbCdEfGhIj"
+> }

@@ -1,0 +1,11 @@
+diff -r /tmp/tmp.6sDJKUPs8j/base/terraform/modules/escola/templates/nginx.conf.tftpl /tmp/tmp.6sDJKUPs8j/tls_desabilitado/terraform/modules/escola/templates/nginx.conf.tftpl
+3c3
+<     listen 443 ssl;
+---
+>     listen 443;
+7,8c7,8
+<     ssl_certificate     /etc/nginx/certs/tls.crt;
+<     ssl_certificate_key /etc/nginx/certs/tls.key;
+---
+> 
+> 
