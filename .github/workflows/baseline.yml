@@ -1,0 +1,84 @@
+---
+# Baseline imperativo (sem IaC): mesmo ambiente de uma escola, criado só com comandos do Docker e do OpenSSL.
+# Rode no MESMO tipo de runner usado nas medições do IaC (fluxo medicao.yml), para que os tempos sejam comparáveis.
+# Este baseline NÃO representa uma pessoa digitando comandos; para isso há o roteiro manual (medicao/PROTOCOLO_BASELINE_MANUAL.md).
+name: baseline
+
+on:
+  workflow_dispatch:
+    inputs:
+      cenarios:
+        description: 'Lista JSON de cenários de uma escola (arquivos em cenarios/ sem .tfvars.json)'
+        default: '["completo_pequeno_n01","completo_medio_n01","completo_grande_n01"]'
+        required: true
+      repeticoes:
+        description: 'Repetições por cenário'
+        default: '10'
+        required: true
+      cache:
+        description: 'Condição das imagens de contêiner'
+        type: choice
+        options: [com_cache, sem_cache]
+        default: com_cache
+      smoke_timeout:
+        description: 'Tempo máximo (s) por teste de fumaça'
+        default: '300'
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  SMOKE_TIMEOUT: ${{ inputs.smoke_timeout }}
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      matrix:
+        cenario: ${{ fromJSON(inputs.cenarios) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Registrar ambiente
+        run: |
+          mkdir -p medicao/resultados
+          {
+            echo "cenario: imperativo_${{ matrix.cenario }}"
+            echo "cache: ${{ inputs.cache }}"
+            echo "repeticoes: ${{ inputs.repeticoes }}"
+            echo "data_utc: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "runner_imagem: ${ImageOS:-?} ${ImageVersion:-?}"
+            echo "cpu: $(nproc) vCPU; memoria: $(free -m | awk '/Mem:/ {print $2}') MB"
+            echo "docker: $(docker --version)"
+            echo "openssl: $(openssl version)"
+          } | tee medicao/resultados/ambiente_imperativo_${{ matrix.cenario }}.txt
+
+      - name: Aquecimento (baixa as imagens; descartado)
+        if: inputs.cache == 'com_cache'
+        run: bash medicao/baseline_imperativo.sh -c cenarios/${{ matrix.cenario }}.tfvars.json -r 1 -d "$RUNNER_TEMP/aquecimento"
+
+      - name: Medir baseline imperativo
+        env:
+          PRE_REP_CMD: ${{ inputs.cache == 'sem_cache' && 'docker system prune -af' || '' }}
+        run: bash medicao/baseline_imperativo.sh -c cenarios/${{ matrix.cenario }}.tfvars.json -r "${{ inputs.repeticoes }}" -d medicao/resultados
+
+      - name: Reunir logs e resultados
+        if: always()
+        run: |
+          mkdir -p saida
+          cp -r medicao/resultados/. saida/ 2>/dev/null || true
+          mkdir -p saida/logs && cp -r medicao/logs/. saida/logs/ 2>/dev/null || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bas-${{ matrix.cenario }}-${{ inputs.cache }}
+          path: saida/
+          retention-days: 90
