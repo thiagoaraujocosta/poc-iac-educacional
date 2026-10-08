@@ -54,6 +54,8 @@ LDAP_BASE="dc=escola,dc=exemplo,dc=org"
 TMP="$TMP_DIR/imperativo"; mkdir -p "$TMP" "$SAIDA_DIR"
 TEMPOS="$SAIDA_DIR/${NOME}_tempos.csv"
 cabecalho_csv "$TEMPOS" run_id cenario porte n fase segundos exit_code falhas_teste timestamp
+REAPL="$SAIDA_DIR/${NOME}_reaplicacao.csv"
+cabecalho_csv "$REAPL" run_id cenario porte passo exit_code
 
 cron_imp() { # RUN_ID FASE COMANDO...
     local run_id="$1" fase="$2"; shift 2
@@ -225,6 +227,19 @@ smoke() {
         bash "$MEDICAO_DIR/smoke_tests.sh"
 }
 
+# Segunda execução do mesmo script, sem destruir o ambiente: registra quais passos falham (equivalente da idempotência).
+# Não é medida de tempo; serve para comparar com a idempotência do plano do OpenTofu (M7).
+reaplicar() {
+    local run_id="$1" par rc
+    for par in imperativo_rede:passo_rede imperativo_volumes:passo_volumes imperativo_ldap:passo_ldap imperativo_banco_moodle:passo_banco_moodle                imperativo_proxy:passo_proxy imperativo_monitoramento:passo_monitoramento imperativo_backup:passo_backup; do
+        ( "${par##*:}" ) > "$LOG_DIR/${NOME}_${run_id}_reapl_${par%%:*}.log" 2>&1
+        rc=$?
+        printf '%s,%s,%s,%s,%d
+' "$run_id" "$NOME" "$PORTE" "${par%%:*}" "$rc" >> "$REAPL"
+    done
+    return 0
+}
+
 destruir() {
     docker rm -f $(docker ps -aq --filter "name=^${P}-") 2> /dev/null
     for v in mariadb-dados dumps moodle-app moodle-dados prometheus-dados grafana-dados ldap-dados ldap-certs backup-repo; do docker volume rm -f "${P}-$v" > /dev/null 2>&1; done
@@ -250,6 +265,7 @@ for ((i = 1; i <= REPETICOES; i++)); do
             if (( rc != 0 )); then ok=0; fi
         fi
     done
+    if (( ok )); then reaplicar "$run_id"; fi
     cron_imp "$run_id" imperativo_destroy destruir
 done
 echo "Concluído. CSV: $TEMPOS"
