@@ -209,7 +209,9 @@ Entradas do `medicao.yml`: `cenarios` (lista JSON, por exemplo `["completo_peque
 
 **Limites do runner.** Em repositório privado, `ubuntu-latest` tem 2 vCPU e 7 GB de RAM; em repositório público, 4 vCPU e 16 GB. Cenários grandes (`completo_grande_n05`) e o perfil leve com 25 e 50 escolas exigem o runner maior. Cada execução grava o hardware efetivo em `ambiente_<cenario>.txt`; os tempos do TCC são os do runner e devem ser descritos assim. Cenários diferentes rodam em máquinas diferentes, o que adiciona variabilidade entre cenários (não dentro de um mesmo cenário).
 
-**O que o CI não faz.** O cenário manual (A) é executado por uma pessoa, seguindo `medicao/PROTOCOLO_BASELINE_MANUAL.md`, em máquina com Docker (por exemplo, GitHub Codespaces ou Docker Desktop). A numeração e o registro dos tempos manuais usam `medicao/modelo_baseline_manual.csv`.
+**Baseline imperativo (`baseline.yml`).** Cria o mesmo ambiente de uma escola só com comandos do Docker e do OpenSSL (`medicao/baseline_imperativo.sh`), sem estado e sem plano, e registra também o que acontece ao executar o script uma segunda vez sobre o ambiente existente. Deve rodar no mesmo tipo de runner das medições do IaC para a comparação valer. Observação: em repositório público o runner `ubuntu-latest` tem 4 vCPU e 16 GB; as medições do TCC foram feitas em 2 vCPU e 7,9 GB (repositório então privado), e os tempos não são comparáveis entre os dois tipos de máquina.
+
+**O que o CI não faz.** O contraste humano é executado por uma pessoa, seguindo `medicao/PROTOCOLO_BASELINE_MANUAL.md`, em máquina com Docker (por exemplo, GitHub Codespaces ou Docker Desktop), registrando os tempos em `medicao/modelo_baseline_manual.csv`.
 
 Todos os valores de segredos no CI são fictícios e gerados na hora; nada sensível é versionado.
 
