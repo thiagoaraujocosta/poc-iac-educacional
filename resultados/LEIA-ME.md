@@ -11,3 +11,9 @@ Arquivos gerados pelo fluxo `medicao.yml` e `validar.yml` no GitHub Actions (exe
 Os logs completos (cerca de 50 MB por lote) ficam nos artefatos das execuções do GitHub Actions e não são versionados.
 Cenários não executados por exceder a memória estimada do runner: `completo_medio_n05` e `completo_grande_n05`.
 O cenário manual (A) não está aqui: depende de execução por uma pessoa (ver `medicao/PROTOCOLO_BASELINE_MANUAL.md`).
+
+## Baseline imperativo
+
+Pastas `bas-<cenario>-<com_cache|sem_cache>/`: o mesmo ambiente de uma escola criado só com comandos do Docker e do OpenSSL
+(`medicao/baseline_imperativo.sh`, fluxo `baseline.yml`), 10 repetições por porte e condição, medido no mesmo tipo de runner do IaC.
+`*_reaplicacao.csv` registra o código de saída de cada passo ao executar o script uma segunda vez sobre o ambiente existente.
