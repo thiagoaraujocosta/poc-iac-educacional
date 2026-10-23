@@ -1,0 +1,11 @@
+run_id,cenario,porte,n,plan_exit_code,recursos_a_alterar,apply2_adicionados,apply2_alterados,apply2_destruidos
+run_01,completo_grande_n01,grande,1,2,3,,,
+run_02,completo_grande_n01,grande,1,2,3,,,
+run_03,completo_grande_n01,grande,1,2,3,,,
+run_04,completo_grande_n01,grande,1,2,3,,,
+run_05,completo_grande_n01,grande,1,2,3,,,
+run_06,completo_grande_n01,grande,1,2,3,,,
+run_07,completo_grande_n01,grande,1,2,3,,,
+run_08,completo_grande_n01,grande,1,2,3,,,
+run_09,completo_grande_n01,grande,1,2,3,,,
+run_10,completo_grande_n01,grande,1,2,3,,,

@@ -1,0 +1,9 @@
+cenario,porte,n,execucoes_medidas,idempotentes,taxa_idempotencia_pct,recursos_a_alterar_max,plan_exit_code_2
+completo_grande_n01,grande,1,10,0,0.0,3,10
+completo_grande_n05,grande,5,10,0,0.0,15,10
+completo_medio_n01,medio,1,10,0,0.0,3,10
+completo_medio_n05,medio,5,10,0,0.0,15,10
+completo_pequeno_n01,pequeno,1,10,0,0.0,3,10
+completo_pequeno_n03,pequeno,3,10,0,0.0,9,10
+leve_n01,medio,1,10,0,0.0,3,10
+leve_n10,misto,10,10,0,0.0,30,10

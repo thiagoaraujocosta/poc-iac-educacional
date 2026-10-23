@@ -1,0 +1,9 @@
+cenario,porte,n,execucoes,hashes_distintos_estado_tf,consistencia_estado_tf_pct,hashes_distintos_docker,consistencia_docker_pct,hashes_distintos_combinado,consistencia_combinado_pct
+completo_grande_n01,grande,1,10,1,100.0,1,100.0,1,100.0
+completo_grande_n05,grande,5,10,1,100.0,1,100.0,1,100.0
+completo_medio_n01,medio,1,10,1,100.0,1,100.0,1,100.0
+completo_medio_n05,medio,5,10,1,100.0,1,100.0,1,100.0
+completo_pequeno_n01,pequeno,1,10,1,100.0,1,100.0,1,100.0
+completo_pequeno_n03,pequeno,3,10,1,100.0,1,100.0,1,100.0
+leve_n01,medio,1,10,1,100.0,1,100.0,1,100.0
+leve_n10,misto,10,10,1,100.0,1,100.0,1,100.0

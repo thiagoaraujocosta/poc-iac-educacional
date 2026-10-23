@@ -1,0 +1,134 @@
+module.escola["escola01"].tls_private_key.proxy: Refreshing state... [id=2b46e01ec5ff3a006f9ec9e5546949c35c7d272e]
+module.escola["escola01"].tls_self_signed_cert.proxy: Refreshing state... [id=135886906999345654517449964123604554486]
+module.escola["escola01"].random_password.segredos["moodle_admin"]: Refreshing state... [id=none]
+module.escola["escola01"].random_password.segredos["grafana_admin"]: Refreshing state... [id=none]
+module.escola["escola01"].random_password.segredos["mariadb_root"]: Refreshing state... [id=none]
+module.escola["escola01"].random_password.segredos["mariadb_moodle"]: Refreshing state... [id=none]
+module.escola["escola01"].docker_image.imagens["nginx"]: Refreshing state... [id=sha256:814a8e88df978ade80e584cc5b333144b9372a8e3c98872d07137dbf3b44d0e4nginx:1.27.3-alpine]
+module.escola["escola01"].docker_image.imagens["grafana"]: Refreshing state... [id=sha256:fa801ab6e1ae035135309580891e09f7eb94d1abdbd2106bdc288030b028158cgrafana/grafana:11.3.1]
+module.escola["escola01"].docker_network.redes["pedagogica"]: Refreshing state... [id=f2927038c056be66d1262a9f0b78939a80d90f3e6557fe94fb1e17bdc1b48097]
+module.escola["escola01"].docker_network.redes["servidores"]: Refreshing state... [id=f7450ca9c0adb064af30e522431555b18d9a1f967c4285f72e05fd7368487ff0]
+module.escola["escola01"].docker_image.imagens["moodle"]: Refreshing state... [id=sha256:241030570120c7caef8f8391541534558a6a432cff2276f6f5c2018b7ab410f6bitnamilegacy/moodle:4.5.2]
+module.escola["escola01"].docker_volume.volumes["moodle-dados"]: Refreshing state... [id=escola01-moodle-dados]
+module.escola["escola01"].docker_network.redes["admin"]: Refreshing state... [id=331edbc98fe83958852a6233a6fc308e820a4fbb3f1d51ee3b082fd9851ee17c]
+module.escola["escola01"].docker_image.imagens["mariadb"]: Refreshing state... [id=sha256:d21c7a73ce3b907ce41f9aefc4f6689de36ac477d3ed12b9c552ef39f8caeac0mariadb:11.4.4]
+module.escola["escola01"].docker_image.imagens["prometheus"]: Refreshing state... [id=sha256:2659f4c2ebb718e7695cb9b25ffa7d6be64db013daba13e05c875451cf51b0d3prom/prometheus:v2.55.1]
+module.escola["escola01"].docker_image.imagens["blackbox"]: Refreshing state... [id=sha256:b04a9fef4fa086a02fc7fcd8dcdbc4b7b35cc30cdee860fdc6a19dd8b208d63eprom/blackbox-exporter:v0.25.0]
+module.escola["escola01"].docker_volume.volumes["dumps"]: Refreshing state... [id=escola01-dumps]
+module.escola["escola01"].docker_volume.volumes["grafana-dados"]: Refreshing state... [id=escola01-grafana-dados]
+module.escola["escola01"].docker_volume.volumes["mariadb-dados"]: Refreshing state... [id=escola01-mariadb-dados]
+module.escola["escola01"].docker_volume.volumes["moodle-app"]: Refreshing state... [id=escola01-moodle-app]
+module.escola["escola01"].docker_volume.volumes["prometheus-dados"]: Refreshing state... [id=escola01-prometheus-dados]
+module.escola["escola01"].docker_container.blackbox[0]: Refreshing state... [id=ec400512c6a2649adef163e784ae049376f13c28db84e5c6990438830c144fd9]
+module.escola["escola01"].docker_container.mariadb[0]: Refreshing state... [id=2de927760975dba39035a7b3ee456b599389c60a287388b256f0498eb497ff62]
+module.escola["escola01"].docker_container.prometheus[0]: Refreshing state... [id=273f3cd55e2bd820910919212e3fd6b82e55e52cc5405b8657efef9d0b27b539]
+module.escola["escola01"].docker_container.grafana[0]: Refreshing state... [id=9cf51482dca64113a91dab1ccdf93692f6adfcc7be4eeafe0b172b5fbf9e00d4]
+module.escola["escola01"].docker_container.nginx: Refreshing state... [id=06cc8c3589068f98eea216ae268b1f887b91ea0085caa1eb01be1329b93341a4]
+module.escola["escola01"].docker_container.moodle[0]: Refreshing state... [id=5664a22a8e0b0cf1941e4b845de9571f47fde6eef6ea7b3fb3c002ab63d38e97]
+
+OpenTofu used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+-/+ destroy and then create replacement
+
+OpenTofu will perform the following actions:
+
+  # module.escola["escola01"].docker_network.redes["admin"] must be replaced
+-/+ resource "docker_network" "redes" {
+      - attachable   = false -> null
+      ~ id           = "331edbc98fe83958852a6233a6fc308e820a4fbb3f1d51ee3b082fd9851ee17c" -> (known after apply)
+      - ingress      = false -> null
+      - ipam_options = {} -> null
+      - ipv6         = false -> null
+        name         = "escola01-admin"
+      ~ options      = {} -> (known after apply)
+      ~ scope        = "local" -> (known after apply)
+        # (3 unchanged attributes hidden)
+
+      - ipam_config { # forces replacement
+          - aux_address = {} -> null
+          - gateway     = "10.64.1.1" -> null
+          - subnet      = "10.64.1.0/24" -> null
+        }
+      + ipam_config { # forces replacement
+          + subnet = "10.64.1.0/24"
+        }
+
+        # (5 unchanged blocks hidden)
+    }
+
+  # module.escola["escola01"].docker_network.redes["pedagogica"] must be replaced
+-/+ resource "docker_network" "redes" {
+      - attachable   = false -> null
+      ~ id           = "f2927038c056be66d1262a9f0b78939a80d90f3e6557fe94fb1e17bdc1b48097" -> (known after apply)
+      - ingress      = false -> null
+      - ipam_options = {} -> null
+      - ipv6         = false -> null
+        name         = "escola01-pedagogica"
+      ~ options      = {} -> (known after apply)
+      ~ scope        = "local" -> (known after apply)
+        # (3 unchanged attributes hidden)
+
+      - ipam_config { # forces replacement
+          - aux_address = {} -> null
+          - gateway     = "10.64.2.1" -> null
+          - subnet      = "10.64.2.0/24" -> null
+        }
+      + ipam_config { # forces replacement
+          + subnet = "10.64.2.0/24"
+        }
+
+        # (5 unchanged blocks hidden)
+    }
+
+  # module.escola["escola01"].docker_network.redes["servidores"] must be replaced
+-/+ resource "docker_network" "redes" {
+      - attachable   = false -> null
+      ~ id           = "f7450ca9c0adb064af30e522431555b18d9a1f967c4285f72e05fd7368487ff0" -> (known after apply)
+      - ingress      = false -> null
+      - ipam_options = {} -> null
+      - ipv6         = false -> null
+        name         = "escola01-servidores"
+      ~ options      = {} -> (known after apply)
+      ~ scope        = "local" -> (known after apply)
+        # (3 unchanged attributes hidden)
+
+      - ipam_config { # forces replacement
+          - aux_address = {} -> null
+          - gateway     = "10.64.3.1" -> null
+          - subnet      = "10.64.3.0/24" -> null
+        }
+      + ipam_config { # forces replacement
+          + subnet = "10.64.3.0/24"
+        }
+
+        # (5 unchanged blocks hidden)
+    }
+
+Plan: 3 to add, 0 to change, 3 to destroy.
+module.escola["escola01"].docker_network.redes["admin"]: Destroying... [id=331edbc98fe83958852a6233a6fc308e820a4fbb3f1d51ee3b082fd9851ee17c]
+module.escola["escola01"].docker_network.redes["pedagogica"]: Destroying... [id=f2927038c056be66d1262a9f0b78939a80d90f3e6557fe94fb1e17bdc1b48097]
+module.escola["escola01"].docker_network.redes["servidores"]: Destroying... [id=f7450ca9c0adb064af30e522431555b18d9a1f967c4285f72e05fd7368487ff0]
+module.escola["escola01"].docker_network.redes["admin"]: Still destroying... [id=331edbc98fe83958852a6233a6fc308e820a4fbb3f1d51ee3b082fd9851ee17c, 10s elapsed]
+module.escola["escola01"].docker_network.redes["servidores"]: Still destroying... [id=f7450ca9c0adb064af30e522431555b18d9a1f967c4285f72e05fd7368487ff0, 10s elapsed]
+module.escola["escola01"].docker_network.redes["pedagogica"]: Still destroying... [id=f2927038c056be66d1262a9f0b78939a80d90f3e6557fe94fb1e17bdc1b48097, 10s elapsed]
+module.escola["escola01"].docker_network.redes["pedagogica"]: Still destroying... [id=f2927038c056be66d1262a9f0b78939a80d90f3e6557fe94fb1e17bdc1b48097, 20s elapsed]
+module.escola["escola01"].docker_network.redes["admin"]: Still destroying... [id=331edbc98fe83958852a6233a6fc308e820a4fbb3f1d51ee3b082fd9851ee17c, 20s elapsed]
+module.escola["escola01"].docker_network.redes["servidores"]: Still destroying... [id=f7450ca9c0adb064af30e522431555b18d9a1f967c4285f72e05fd7368487ff0, 20s elapsed]
+module.escola["escola01"].docker_network.redes["servidores"]: Still destroying... [id=f7450ca9c0adb064af30e522431555b18d9a1f967c4285f72e05fd7368487ff0, 30s elapsed]
+module.escola["escola01"].docker_network.redes["pedagogica"]: Still destroying... [id=f2927038c056be66d1262a9f0b78939a80d90f3e6557fe94fb1e17bdc1b48097, 30s elapsed]
+module.escola["escola01"].docker_network.redes["admin"]: Still destroying... [id=331edbc98fe83958852a6233a6fc308e820a4fbb3f1d51ee3b082fd9851ee17c, 30s elapsed]
+╷
+│ Error: timeout while waiting for state to become 'removed' (last state: 'pending', timeout: 30s)
+│ 
+│ 
+╵
+╷
+│ Error: timeout while waiting for state to become 'removed' (last state: 'pending', timeout: 30s)
+│ 
+│ 
+╵
+╷
+│ Error: timeout while waiting for state to become 'removed' (last state: 'pending', timeout: 30s)
+│ 
+│ 
+╵
