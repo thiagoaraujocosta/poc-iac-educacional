@@ -1,5 +1,10 @@
 # Protocolo do baseline manual
 
+> **Situação.** O tempo de uma pessoa executando este roteiro não foi cronometrado no TCC: ele é estimado pelo modelo KLM
+> (`klm_estimativa.py`), a partir do script `baseline_imperativo.sh`. Este protocolo serve a uma execução cronometrada futura
+> para verificar a estimativa. Ele cita sub-redes 10.40.x e CN=localhost; o baseline imperativo atual usa 10.64.x e o domínio
+> `escola.local`, e o protocolo deve ser ajustado a isso antes do uso.
+
 Este protocolo descreve como executar e cronometrar, à mão, o mesmo ambiente que o
 fluxo IaC cria. Os tempos manuais e os tempos do fluxo IaC só são comparáveis se as
 condições abaixo forem respeitadas.

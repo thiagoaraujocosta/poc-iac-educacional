@@ -22,3 +22,6 @@ __pycache__/
 dados/*.zip
 dados/microdados_*/
 dados/**/*.csv
+
+# Logs completos baixados dos artefatos (caminhos longos no Windows; ficam nos artefatos do Actions)
+resultados/**/logs/

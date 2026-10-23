@@ -211,7 +211,7 @@ Entradas do `medicao.yml`: `cenarios` (lista JSON, por exemplo `["completo_peque
 
 **Baseline imperativo (`baseline.yml`).** Cria o mesmo ambiente de uma escola só com comandos do Docker e do OpenSSL (`medicao/baseline_imperativo.sh`), sem estado e sem plano, e registra também o que acontece ao executar o script uma segunda vez sobre o ambiente existente. Deve rodar no mesmo tipo de runner das medições do IaC para a comparação valer. Observação: em repositório público o runner `ubuntu-latest` tem 4 vCPU e 16 GB; as medições do TCC foram feitas em 2 vCPU e 7,9 GB (repositório então privado), e os tempos não são comparáveis entre os dois tipos de máquina.
 
-**O que o CI não faz.** O contraste humano é executado por uma pessoa, seguindo `medicao/PROTOCOLO_BASELINE_MANUAL.md`, em máquina com Docker (por exemplo, GitHub Codespaces ou Docker Desktop), registrando os tempos em `medicao/modelo_baseline_manual.csv`.
+**O que o CI não faz.** O tempo de uma pessoa não é medido: `medicao/klm_estimativa.py` o estima pelo modelo KLM (Card, Moran e Newell, 1980) a partir do script imperativo e dos tempos de máquina medidos; é uma estimativa, e não inclui erros humanos. Para verificá-la, uma pessoa pode executar `medicao/PROTOCOLO_BASELINE_MANUAL.md` (ajustando sub-redes e domínio ao baseline atual) e registrar os tempos em `medicao/modelo_baseline_manual.csv`. As medições foram repetidas em runner de 4 vCPU (`resultados/replicacao-4vcpu/`); ver `resultados/LEIA-ME.md`.
 
 Todos os valores de segredos no CI são fictícios e gerados na hora; nada sensível é versionado.
 
