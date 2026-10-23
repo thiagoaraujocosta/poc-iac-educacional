@@ -124,8 +124,11 @@ resource "docker_network" "redes" {
   driver   = "bridge"
   internal = each.key == "servidores" ? local.rede_servidores_sem_saida : false
 
+  # O gateway é declarado porque o Docker 29 o devolve na leitura da rede e, sem ele, o plano
+  # acusa diferença e força a substituição das redes a cada execução.
   ipam_config {
-    subnet = each.value
+    subnet  = each.value
+    gateway = cidrhost(each.value, 1)
   }
 
   dynamic "labels" {
