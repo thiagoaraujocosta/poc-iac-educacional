@@ -24,5 +24,5 @@ Repetição das medições em 23/10/2026 no runner público (4 vCPU, 16 GB, Ubun
 para não misturar com as medições principais (2 vCPU, Docker 28.0.4). `medicao/` tem 8 cenários do IaC e `baseline/` os 3 portes do script.
 Nessa replicação a idempotência falhou em 80 de 80 execuções: o Docker 29 devolve o gateway da rede e o módulo declarava só a sub-rede
 (evidência em `evidencia_plano_docker29.log`). O módulo passou a declarar o gateway (commit `a7e0329`); `validacao-fix/` tem a rodada de
-validação com o código corrigido (2 cenários x 3 execuções, 6 de 6 idempotentes). Os tempos da replicação não são afetados, porque a
+validação com o código corrigido (2 cenários x 3 execuções, 6 de 6 idempotentes) e `validacao-deriva/` (porte pequeno, 10 execuções: 10 de 10 idempotentes; deriva 70 de 100, igual às medições principais). Os tempos da replicação não são afetados, porque a
 idempotência é medida depois do tempo de provisionamento. As medições principais usaram o código anterior à correção.
