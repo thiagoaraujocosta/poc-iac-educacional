@@ -1,0 +1,3 @@
+cenario,porte,n,execucoes,hashes_distintos_estado_tf,consistencia_estado_tf_pct,hashes_distintos_docker,consistencia_docker_pct,hashes_distintos_combinado,consistencia_combinado_pct
+completo_pequeno_n01,pequeno,1,3,1,100.0,1,100.0,1,100.0
+leve_n01,medio,1,3,1,100.0,1,100.0,1,100.0

@@ -1,0 +1,4 @@
+run_id,cenario,porte,n,plan_exit_code,recursos_a_alterar,apply2_adicionados,apply2_alterados,apply2_destruidos
+run_01,completo_pequeno_n01,pequeno,1,0,0,0,0,0
+run_02,completo_pequeno_n01,pequeno,1,0,0,0,0,0
+run_03,completo_pequeno_n01,pequeno,1,0,0,0,0,0

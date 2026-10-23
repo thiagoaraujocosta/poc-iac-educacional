@@ -1,0 +1,3 @@
+cenario,porte,n,execucoes,execucoes_com_falha,taxa_falha_pct,testes_de_fumaca_falhos,fases_com_falha
+completo_pequeno_n01,pequeno,1,3,0,0.0,0,-
+leve_n01,medio,1,3,0,0.0,0,-

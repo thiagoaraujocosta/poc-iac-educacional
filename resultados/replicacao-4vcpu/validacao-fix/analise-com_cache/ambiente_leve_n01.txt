@@ -1,0 +1,9 @@
+cenario: leve_n01
+cache: com_cache
+repeticoes: 3
+data_utc: 2026-10-23T18:23:28Z
+runner_imagem: ubuntu26 20261012.163.1
+cpu: 4 vCPU; memoria: 15983 MB
+docker: Docker version 29.4.2, build 055a478
+tofu: OpenTofu v1.13.2
+ansible: ansible [core 2.21.5]
