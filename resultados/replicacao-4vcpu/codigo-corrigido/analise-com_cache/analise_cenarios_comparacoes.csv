@@ -1,0 +1,5 @@
+grupo_a,grupo_b,n_a,n_b,mediana_a_s,mediana_b_s,U,p_valor,metodo,delta_cliff,magnitude
+completo_grande_n01,completo_medio_n01,10,10,81.6035,70.511,98.0,0.00032983852077799353,scipy,0.96,grande
+completo_grande_n01,completo_pequeno_n01,10,10,81.6035,70.306,96.0,0.0005828399431792743,scipy,0.92,grande
+completo_medio_n01,completo_pequeno_n01,10,10,70.511,70.306,59.0,0.5205228832757727,scipy,0.18,pequena
+completo_grande_n05,completo_medio_n05,10,10,265.115,254.94400000000002,88.0,0.004586392080253494,scipy,0.76,grande
